@@ -38,7 +38,9 @@
     #:queue-empty-p
     #:queue-append
 
-    ))
+    )
+  (:shadowing-import-from #:cl-arrows
+    #:->))
 
 (defpackage #:sand.random-numbers
   (:use
@@ -47,5 +49,7 @@
     #:iterate
     #:cl-arrows
     #:sand.quickutils
-    #:sand.utils))
+    #:sand.utils)
+  (:shadowing-import-from #:cl-arrows
+    #:->))
 
