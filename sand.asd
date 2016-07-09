@@ -9,7 +9,9 @@
 
   :depends-on (#:defstar
                #:iterate
-               #:cl-arrows)
+               #:cl-arrows
+               #:cl-fad
+               #:parenscript)
 
   :serial t
   :components
@@ -19,4 +21,6 @@
     :serial t
     :components ((:file "utils")
                  (:file "random-numbers")
-                 ))))
+                 (:module "parenscript"
+                  :serial t
+                  :components ((:file "compiler")))))))

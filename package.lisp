@@ -53,3 +53,17 @@
   (:shadowing-import-from #:cl-arrows
     #:->))
 
+(defpackage #:sand.parenscript
+  (:use
+    #:cl
+    #:defstar
+    #:sand.quickutils
+    #:cl-arrows
+    #:cl-fad
+
+    #:parenscript)
+  (:shadowing-import-from #:cl-arrows
+    #:->)
+  (:import-from #:sand.utils)
+  )
+

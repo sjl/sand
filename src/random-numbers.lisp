@@ -53,15 +53,3 @@
     form))
 
 
-(defun dammit () (make-linear-congruential-rng 50 2 3 2))
-(defparameter *r* (dammit))
-(disassemble *r*)
-
-(defparameter m 40)
-
-(defun run ()
-  (let ((r (make-linear-congruential-rng 50 2 3 2)))
-    (disassemble r)
-    (funcall r 100000000)))
-
-(time (run))
