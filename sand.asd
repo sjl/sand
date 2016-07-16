@@ -7,7 +7,7 @@
   :license "MIT/X11"
   :version "0.0.1"
 
-  :depends-on (#:defstar
+  :depends-on (#:cl-charms
                #:iterate
                #:cl-arrows
                #:cl-fad
@@ -21,6 +21,7 @@
     :serial t
     :components ((:file "utils")
                  (:file "random-numbers")
+                 (:file "ascii")
                  (:module "parenscript"
                   :serial t
                   :components ((:file "compiler")))))))

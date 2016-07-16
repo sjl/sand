@@ -9,21 +9,16 @@
 (deftype nonnegative-fixnum () `(integer 1 ,most-positive-fixnum))
 (deftype nonpositive-fixnum () `(integer ,most-negative-fixnum -1))
 
+
 ;;;; Utils
-(defun* +mod ((x nonnegative-fixnum)
-              (y nonnegative-fixnum)
-              (m positive-fixnum))
+(defun +mod (x y m)
   (if (<= x (- m 1 y))
     (+ x y)
     (- x (- m y))))
 
 
 ;;;; Random Number Generators
-(defun* make-linear-congruential-rng
-    ((modulus positive-fixnum)
-     (multiplier nonnegative-fixnum)
-     (increment nonnegative-fixnum)
-     (seed nonnegative-fixnum))
+(defun make-linear-congruential-rng (modulus multiplier increment seed)
   (let ((val seed))
     (lambda (msg)
       (ecase msg
@@ -32,11 +27,7 @@
                               modulus)))
         (:modulus modulus)))))
 
-(defun* make-linear-congruential-rng-fast%
-    ((modulus positive-fixnum)
-     (multiplier nonnegative-fixnum)
-     (increment nonnegative-fixnum)
-     (seed nonnegative-fixnum))
+(defun make-linear-congruential-rng-fast% (modulus multiplier increment seed)
   (declare (optimize (speed 3) (safety 0) (debug 0)))
   (let ((val seed))
     (lambda (msg)
@@ -49,12 +40,10 @@
 
 (declaim (inline rng-next rng-modulus))
 
-(defun* rng-next ((generator function))
-  (:returns positive-fixnum)
+(defun rng-next (generator)
   (funcall generator :next))
 
-(defun* rng-modulus ((generator function))
-  (:returns positive-fixnum)
+(defun rng-modulus (generator)
   (funcall generator :modulus))
 
 
@@ -90,8 +79,7 @@
 ;;;    A B C A B C A B
 ;;;
 ;;; Notice that it's not uniform.
-(defun* monte-carlo ((width positive-fixnum))
-  (:returns positive-fixnum)
+(defun monte-carlo (width)
   (mod (rng-next *generator*) width))
 
 
@@ -101,8 +89,7 @@
 ;;;
 ;;;    1 2 3 4 5 6 7 8
 ;;;    A A B B C C retry
-(defun* las-vegas ((width positive-fixnum))
-  (:returns positive-fixnum)
+(defun las-vegas (width)
   (let* ((modulus (rng-modulus *generator*))
          (bucket-width (truncate (/ modulus width))))
     (iterate

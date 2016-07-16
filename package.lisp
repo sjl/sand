@@ -1,7 +1,9 @@
+; (rename-package :charms :hunchentoot '(:ht))
+
+
 (defpackage #:sand.utils
   (:use
     #:cl
-    #:defstar
     #:iterate
     #:cl-arrows
     #:sand.quickutils)
@@ -45,7 +47,6 @@
 (defpackage #:sand.random-numbers
   (:use
     #:cl
-    #:defstar
     #:iterate
     #:cl-arrows
     #:sand.quickutils
@@ -56,7 +57,6 @@
 (defpackage #:sand.parenscript
   (:use
     #:cl
-    #:defstar
     #:sand.quickutils
     #:cl-arrows
     #:cl-fad
@@ -67,3 +67,10 @@
   (:import-from #:sand.utils)
   )
 
+
+(defpackage #:sand.ascii
+  (:use #:cl
+        #:iterate
+        #:cl-arrows
+        #:sand.quickutils
+        #:sand.utils))
