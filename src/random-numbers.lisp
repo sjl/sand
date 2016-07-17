@@ -2,7 +2,8 @@
 
 
 ;;;; Types, etc
-(declaim (optimize (speed 1) (safety 1) (debug 3)))
+; (declaim (optimize (speed 1) (safety 1) (debug 3)))
+; (declaim (optimize (speed 3) (safety 0) (debug 0)))
 
 (deftype positive-fixnum () `(integer 1 ,most-positive-fixnum))
 (deftype negative-fixnum () `(integer ,most-negative-fixnum -1))
@@ -11,7 +12,14 @@
 
 
 ;;;; Utils
-(defun +mod (x y m)
+(declaim (ftype (function (nonnegative-fixnum
+                            nonnegative-fixnum
+                            nonnegative-fixnum)
+                          nonnegative-fixnum)
+                mod+)
+         (inline mod+))
+
+(defun mod+ (x y m)
   (if (<= x (- m 1 y))
     (+ x y)
     (- x (- m y))))
@@ -19,23 +27,16 @@
 
 ;;;; Random Number Generators
 (defun make-linear-congruential-rng (modulus multiplier increment seed)
-  (let ((val seed))
-    (lambda (msg)
-      (ecase msg
-        (:next (setf val (mod (+ (* multiplier val)
-                                 increment)
-                              modulus)))
-        (:modulus modulus)))))
-
-(defun make-linear-congruential-rng-fast% (modulus multiplier increment seed)
-  (declare (optimize (speed 3) (safety 0) (debug 0)))
-  (let ((val seed))
-    (lambda (msg)
-      (ecase msg
-        (:next (setf val (mod (+ (the nonnegative-fixnum (* multiplier val))
-                                 increment)
-                              modulus)))
-        (:modulus modulus)))))
+  (declare (type nonnegative-fixnum seed)
+           (type positive-fixnum modulus multiplier increment))
+  (let ((val (mod (logxor seed multiplier)
+                  modulus)))
+    (dlambda
+      (:next ()
+       (ldb (byte 32 16)
+            (setf val (mod (+ (* val multiplier) increment)
+                           modulus))))
+      (:modulus () modulus))))
 
 
 (declaim (inline rng-next rng-modulus))
@@ -58,7 +59,11 @@
     form))
 
 
-(defparameter *generator* (make-linear-congruential-rng 601 15 4 354))
+(defparameter *generator*
+  (make-linear-congruential-rng (expt 2 48)
+                                25214903917
+                                11
+                                0))
 
 
 (defun rand ()
@@ -103,3 +108,19 @@
 
 (defun rand-range (min max)
   (+ min (las-vegas (- max min))))
+
+
+
+;;;; Spectral Test
+(defun spectral ()
+  (spit "data"
+    (iterate
+      (repeat 1000)
+      (for i = (rand))
+      (for j :previous i)
+      (for k :previous j)
+      (when k
+        (format t "~d ~d ~d~%" i j k)))))
+
+
+; (spectral)

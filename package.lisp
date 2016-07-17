@@ -13,6 +13,10 @@
     #:recursively
     #:recur
     #:dis
+    #:bits
+    #:spit
+
+    #:dlambda
 
     #:hash-set
     #:make-set

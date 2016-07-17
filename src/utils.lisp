@@ -56,12 +56,35 @@
   doing what you think it should be doing.
 
   "
-  `(->> '(lambda* ,arglist
+  `(->> '(lambda ,arglist
           (declare (optimize speed))
           ,@body)
-    macroexpand-1
     (compile nil)
-    disassemble))
+    #+sbcl sb-disassem:disassemble-code-component
+    #-sbcl disassemble))
+
+(defun bits (n size)
+  ;; http://blog.chaitanyagupta.com/2013/10/print-bit-representation-of-signed.html
+  (format t (format nil "~~~D,'0B" size) (ldb (byte size 0) n))
+  (values))
+
+(defmacro spit (filename &body body)
+  `(with-open-file (*standard-output* ,filename
+                                      :direction :output
+                                      :if-exists :supersede)
+     ,@body))
+
+
+;;;; dlambda
+(defmacro dlambda (&rest clauses)
+  (with-gensyms (message arguments)
+    (flet ((parse-clause (clause)
+             (destructuring-bind (key arglist &rest body)
+                 clause
+               `(,key (apply (lambda ,arglist ,@body) ,arguments)))))
+      `(lambda (,message &rest ,arguments)
+        (ecase ,message
+          ,@(mapcar #'parse-clause clauses))))))
 
 
 ;;;; Sets
@@ -123,7 +146,9 @@
 (defmethod print-object ((set hash-set) stream)
   (print-unreadable-object (set stream :type t)
     (format stream "~{~S~^ ~}"
-            (hash-keys (slot-value set 'data)))))
+            (iterate
+              (for (key) :in-hashtable (slot-value set 'data))
+              (collect key)))))
 
 
 ;;;; Iterate
