@@ -7,8 +7,8 @@
 
 (deftype positive-fixnum () `(integer 1 ,most-positive-fixnum))
 (deftype negative-fixnum () `(integer ,most-negative-fixnum -1))
-(deftype nonnegative-fixnum () `(integer 1 ,most-positive-fixnum))
-(deftype nonpositive-fixnum () `(integer ,most-negative-fixnum -1))
+(deftype nonnegative-fixnum () `(integer 0 ,most-positive-fixnum))
+(deftype nonpositive-fixnum () `(integer ,most-negative-fixnum 0))
 
 
 ;;;; Utils
@@ -26,6 +26,18 @@
 
 
 ;;;; Random Number Generators
+(defun make-linear-congruential-rng-java (modulus multiplier increment seed)
+  (declare (type nonnegative-fixnum seed)
+           (type positive-fixnum modulus multiplier increment))
+  (let ((val (mod (logxor seed multiplier)
+                  modulus)))
+    (dlambda
+      (:next ()
+       (ldb (byte 32 16) ; java's j.u.Random only gives out 32 high-order bits
+            (setf val (mod (+ (* val multiplier) increment)
+                           modulus))))
+      (:modulus () modulus))))
+
 (defun make-linear-congruential-rng (modulus multiplier increment seed)
   (declare (type nonnegative-fixnum seed)
            (type positive-fixnum modulus multiplier increment))
@@ -33,9 +45,8 @@
                   modulus)))
     (dlambda
       (:next ()
-       (ldb (byte 32 16)
-            (setf val (mod (+ (* val multiplier) increment)
-                           modulus))))
+       (setf val (mod (+ (* val multiplier) increment)
+                      modulus)))
       (:modulus () modulus))))
 
 
@@ -46,17 +57,6 @@
 
 (defun rng-modulus (generator)
   (funcall generator :modulus))
-
-
-(define-compiler-macro make-linear-congruential-rng
-    (&whole form
-     modulus multiplier increment seed)
-  (if (and (constantp modulus)
-           (constantp multiplier)
-           (<= (* multiplier (1- modulus))
-               most-positive-fixnum))
-    `(make-linear-congruential-rng-fast% ,modulus ,multiplier ,increment ,seed)
-    form))
 
 
 (defparameter *generator*
@@ -110,7 +110,6 @@
   (+ min (las-vegas (- max min))))
 
 
-
 ;;;; Spectral Test
 (defun spectral ()
   (spit "data"
@@ -123,4 +122,34 @@
         (format t "~d ~d ~d~%" i j k)))))
 
 
+;;;; Distributions
+(defun prefix-sums (list)
+  (iterate
+    (for i :in list)
+    (sum i :into s)
+    (collect s :result-type vector)))
+
+(defun frequencies (seq &key (test 'eql))
+  (iterate
+    (with result = (make-hash-table :test test))
+    (for i :in-whatever seq)
+    (incf (gethash i result 0))
+    (finally (return result))))
+
+
+(defun random-weighted-list (weights n)
+  (iterate
+    (with sums = (prefix-sums weights))
+    (with max = (elt sums (1- (length sums))))
+    (repeat n)
+    (collect (iterate
+               (with r = (rand-range 0 max))
+               (for s :in-vector sums :with-index i)
+               (finding i :such-that (< r s))))))
+
+(defun random-weighted (weights)
+  (first (random-weighted-list weights 1)))
+
+
+;;;; Scratch
 ; (spectral)
