@@ -205,3 +205,33 @@
                           (if (< ,i ,len)
                             (elt ,source ,i)
                             (terminate))))))))
+
+; (defun array-subscripts (a row-major-index)
+;   "Convert the row-major index `i` to a list of subscripts for accessing in `a`.
+  
+;   This is basically the inverse of 'array-row-major-index`."
+;   (loop :with dims = (array-dimensions a)
+;         :with i = row-major-index
+;         :for ds :on dims
+;         :for size = (apply #'* (cdr ds))
+;         :collect (multiple-value-bind (idx rem)
+;                      (floor i size)
+;                    (setf i rem)
+;                    idx)))
+
+; (defmacro-driver (FOR var ACROSS-ARRAY array WITH-INDICES index-vars)
+;   "Iterate across a multidimensional array."
+;   (labels ((array-row-major-to-indexes (dimensions ))))
+;   (let ((kwd (if generate 'generate 'for)))
+;     (with-gensyms (arr size i)
+;       `(progn
+;         (with ,arr = ,array)
+;         (with ,size = (array-total-size ,arr))
+
+;         (generate ,i :from 0 :below ,size)
+;         (generate ,index-vars = (array-subscripts ,arr ,i))
+;         ,@(mapcar (lambda (v) `(generate )))
+
+;         (,kwd ,var next
+;               ()
+;               )))))
