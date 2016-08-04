@@ -11,7 +11,8 @@
                #:iterate
                #:cl-arrows
                #:cl-fad
-               #:parenscript)
+               #:parenscript
+               #:sketch)
 
   :serial t
   :components
@@ -22,6 +23,7 @@
     :components ((:file "utils")
                  (:file "random-numbers")
                  (:file "ascii")
+                 (:file "sketch")
                  (:module "parenscript"
                   :serial t
                   :components ((:file "compiler")))))))

@@ -79,3 +79,14 @@
         #:cl-arrows
         #:sand.quickutils
         #:sand.utils))
+
+
+(defpackage #:sand.sketch
+  (:use
+    #:cl
+    #:sketch
+    #:iterate
+    #:sand.quickutils
+    #:sand.utils)
+  (:shadowing-import-from #:iterate
+    #:in))
