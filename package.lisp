@@ -4,54 +4,19 @@
 (defpackage #:sand.utils
   (:use
     #:cl
+    #:losh
     #:iterate
     #:cl-arrows
     #:sand.quickutils)
   (:export
-    #:zap%
-    #:%
-    #:recursively
-    #:recur
-    #:dis
-    #:bits
-    #:spit
-
-    #:dlambda
-
-    #:hash-set
-    #:make-set
-    #:set-contains-p
-    #:set-add
-    #:set-remove
-    #:set-add-all
-    #:set-remove-all
-    #:set-random
-    #:set-pop
-    #:set-empty-p
-    #:set-clear
-
-    #:averaging
-    #:timing
-    #:real-time
-    #:run-time
-    #:since-start-into
-    #:per-iteration-into
-    #:in-whatever
-
-    #:queue
-    #:queue-contents
-    #:enqueue
-    #:dequeue
-    #:queue-empty-p
-    #:queue-append
-
-    )
+    #:average4)
   (:shadowing-import-from #:cl-arrows
     #:->))
 
 (defpackage #:sand.random-numbers
   (:use
     #:cl
+    #:losh
     #:iterate
     #:cl-arrows
     #:sand.quickutils
@@ -62,28 +27,40 @@
 (defpackage #:sand.parenscript
   (:use
     #:cl
+    #:losh
     #:sand.quickutils
     #:cl-arrows
     #:cl-fad
-
     #:parenscript)
   (:shadowing-import-from #:cl-arrows
     #:->)
-  (:import-from #:sand.utils)
-  )
+  (:shadowing-import-from #:losh
+    #:%))
 
 
 (defpackage #:sand.ascii
-  (:use #:cl
-        #:iterate
-        #:cl-arrows
-        #:sand.quickutils
-        #:sand.utils))
+  (:use
+    #:cl
+    #:losh
+    #:iterate
+    #:cl-arrows
+    #:sand.quickutils
+    #:sand.utils))
 
+
+(defpackage #:sand.terrain.diamond-square
+  (:use
+    #:cl
+    #:losh
+    #:iterate
+    #:cl-arrows
+    #:sand.quickutils
+    #:sand.utils))
 
 (defpackage #:sand.sketch
   (:use
     #:cl
+    #:losh
     #:sketch
     #:iterate
     #:sand.quickutils

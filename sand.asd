@@ -12,7 +12,8 @@
                #:cl-arrows
                #:cl-fad
                #:parenscript
-               #:sketch)
+               #:sketch
+               #:losh)
 
   :serial t
   :components
@@ -23,7 +24,10 @@
     :components ((:file "utils")
                  (:file "random-numbers")
                  (:file "ascii")
-                 (:file "sketch")
+                 (:module "terrain"
+                  :serial t
+                  :components ((:file "diamond-square")))
                  (:module "parenscript"
                   :serial t
-                  :components ((:file "compiler")))))))
+                  :components ((:file "compiler")))
+                 (:file "sketch")))))
