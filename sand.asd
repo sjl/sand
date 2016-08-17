@@ -11,6 +11,7 @@
                #:iterate
                #:cl-arrows
                #:cl-fad
+               #:split-sequence
                #:parenscript
                #:sketch
                #:losh)
@@ -24,6 +25,7 @@
     :components ((:file "utils")
                  (:file "random-numbers")
                  (:file "ascii")
+                 (:file "markov")
                  (:module "terrain"
                   :serial t
                   :components ((:file "diamond-square")))

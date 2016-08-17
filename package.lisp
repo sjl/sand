@@ -37,7 +37,6 @@
   (:shadowing-import-from #:losh
     #:%))
 
-
 (defpackage #:sand.ascii
   (:use
     #:cl
@@ -46,7 +45,6 @@
     #:cl-arrows
     #:sand.quickutils
     #:sand.utils))
-
 
 (defpackage #:sand.terrain.diamond-square
   (:use
@@ -67,3 +65,12 @@
     #:sand.utils)
   (:shadowing-import-from #:iterate
     #:in))
+
+(defpackage #:sand.markov
+  (:use
+    #:cl
+    #:losh
+    #:iterate
+    #:split-sequence
+    #:sand.quickutils
+    #:sand.utils))

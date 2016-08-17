@@ -20,7 +20,7 @@
   (incf (getf *ball* :x)
         (getf *ball* :vx))
   (when (not (< 0 (getf *ball* :x) (1- *width*)))
-    (zap% (getf *ball* :vx) #'- %))
+    (negatef (getf *ball* :vx)))
   (setf (getf *ball* :y) (truncate (/ *height* 2))))
 
 (defun handle-input ()
