@@ -14,7 +14,15 @@
                #:split-sequence
                #:parenscript
                #:sketch
-               #:losh)
+               #:losh
+               #:drakma
+               #:yason
+               #:flexi-streams
+               #:sanitize
+               #:html-entities
+               #:plump
+               #:clss
+               )
 
   :serial t
   :components

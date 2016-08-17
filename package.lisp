@@ -69,6 +69,7 @@
 (defpackage #:sand.markov
   (:use
     #:cl
+    #:cl-arrows
     #:losh
     #:iterate
     #:split-sequence

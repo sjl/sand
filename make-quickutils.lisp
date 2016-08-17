@@ -10,6 +10,7 @@
                :rcurry
                :n-grams
                :define-constant
+               :riffle
                ; :switch
                ; :while
                ; :ensure-boolean
