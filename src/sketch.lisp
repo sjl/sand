@@ -42,7 +42,6 @@
 
 
 ;;;; Box
-
 (defparameter *world-exponent* 4)
 (defparameter *world-size* (expt 2 *world-exponent*))
 
@@ -69,7 +68,7 @@
 
 
 (defun draw-hm (hm ox oy ts)
-  (let ((size (- (hm-size hm) 0)))
+  (let ((size (first (array-dimensions hm))))
     (in-context
       (translate (* ox (* ts size))
                  (* oy (* ts size)))
@@ -104,8 +103,8 @@
      ;; Data
      (size (1+ (expt 2 4)))
      (hm (sand.terrain.diamond-square::diamond-square
-           (allocate-heightmap size)))
-     (tile-size 5)
+           5 :tileable t :spread 0.7 :spread-reduction 0.5))
+     (tile-size 3)
      ;; Pens
      (black-pen (make-pen :stroke (rgb 0 0 0) :fill (rgb 0.4 0.4 0.4) :weight 1 :curve-steps 50))
      (red-pen (make-pen :stroke (rgb 0.6 0 0) :fill (rgb 0.9 0 0) :weight 1 :curve-steps 50))
@@ -116,12 +115,11 @@
   ;;
   (just-once done
     (with-setup
-      (in-context
+      (iterate
+        (for x :from 0 :to (floor *width* (* size tile-size)))
         (iterate
-          (for x :from 0 :to (floor *width* (* size tile-size)))
-          (iterate
-            (for y :from 0 :to (floor *height* (* size tile-size)))
-            (draw-hm hm x y tile-size))))))
+          (for y :from 0 :to (floor *height* (* size tile-size)))
+          (draw-hm hm x y tile-size)))))
   ;;
 
   )

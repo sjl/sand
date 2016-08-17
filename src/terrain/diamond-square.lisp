@@ -3,14 +3,21 @@
 
 
 (defvar *size* nil)
+(defvar *tileable* nil)
 
 (defun heightmap-size (heightmap)
   (first (array-dimensions heightmap)))
 
 (defun hm-ref (heightmap x y)
   (flet ((ref (n)
-           (cond ((< -1 n *size*) n)
-                 (t (mod n *size*)))))
+           (cond ((< n 0)
+                  (- (mod n *size*)
+                     (if *tileable* 0 1)))
+                 ((< n *size*)
+                  n)
+                 ((>= n *size*)
+                  (+ (mod n *size*)
+                     (if *tileable* 0 1))))))
     (aref heightmap (ref x) (ref y))))
 
 
@@ -70,18 +77,23 @@
       (ds-diamond heightmap x y radius spread))))
 
 
-(defun diamond-square (heightmap)
-  (ds-init heightmap)
-  (let ((*size* (heightmap-size heightmap))
-        (spread 0.8)
-        (spread-reduction 0.7))
-    (recursively ((radius (floor size 2))
+(defun diamond-square (exponent &key (spread 0.7) (spread-reduction 0.7) (tileable nil))
+  (let* ((*size* (if tileable
+                   (expt 2 exponent)
+                   (1+ (expt 2 exponent))))
+         (*tileable* tileable)
+         (heightmap (make-array (list *size* *size*)
+                      :element-type 'single-float
+                      :initial-element 0.0
+                      :adjustable nil)))
+    (ds-init heightmap)
+    (recursively ((radius (floor *size* 2))
                   (spread spread))
       (when (>= radius 1)
         (ds-squares heightmap radius spread)
         (ds-diamonds heightmap radius spread)
         (recur (/ radius 2)
-               (* spread spread-reduction)))))
-  (normalize-heightmap heightmap)
-  heightmap)
+               (* spread spread-reduction))))
+    (normalize-heightmap heightmap)
+    heightmap))
 
