@@ -24,19 +24,6 @@
      :type function)))
 
 
-(defun make-dijkstra-map (array goal-p impassable-p)
-  (let ((dm (make-instance 'dijkstra-map
-                           :source array
-                           :map (make-array (array-dimensions array)
-                                  :element-type 'single-float
-                                  :initial-element 0.0
-                                  :adjustable nil)
-                           :maximum-value 0.0
-                           :impassable-p impassable-p
-                           :goal-p goal-p)))
-    (dm-recalculate dm)
-    dm))
-
 (defmethod print-object ((object dijkstra-map) stream)
   (destructuring-bind (rows cols)
       (array-dimensions (dm-map object))
@@ -54,6 +41,53 @@
               (format stream " ~5,1F" val)))
           (terpri stream))
         (format stream "   ...very large array...")))))
+
+
+(defun dm-ref (dm x y)
+  (aref (dm-map dm) x y))
+
+
+;;;; Reference
+(defun make-dijkstra-map (array goal-p impassable-p)
+  (let ((dm (make-instance 'dijkstra-map
+                           :source array
+                           :map (make-array (array-dimensions array))
+                           :maximum-value 0.0
+                           :impassable-p impassable-p
+                           :goal-p goal-p)))
+    (dm-recalculate dm)
+    dm))
+
+
+(defun array-index-in-bounds-p (array &rest subscripts)
+  (iterate
+    (for dimension :in (array-dimensions array))
+    (for subscript :in subscripts)
+    (always (< -1 subscript dimension))))
+
+(defun array-neighboring-indices (array row col radius)
+  (iterate
+    (for (dr dc) :within-radius radius :skip-origin t)
+    (for r = (+ row dr))
+    (for c = (+ col dc))
+    (when (array-index-in-bounds-p array r c)
+      (collect (list r c)))))
+
+
+
+;;;; Chili Dogs
+(defun make-dijkstra-map (array goal-p impassable-p)
+  (let ((dm (make-instance 'dijkstra-map
+                           :source array
+                           :map (make-array (array-dimensions array)
+                                  :element-type 'single-float
+                                  :initial-element 0.0
+                                  :adjustable nil)
+                           :maximum-value 0.0
+                           :impassable-p impassable-p
+                           :goal-p goal-p)))
+    (dm-recalculate dm)
+    dm))
 
 
 (defun dm-recalculate (dm)
@@ -98,9 +132,6 @@
         (finally (setf (dm-maximum-value dm) (float max)))))))
 
 
-
-(defun dm-ref (dm x y)
-  (aref (dm-map dm) x y))
 
 ; (defparameter *m*
 ;   (make-array '(5 6)
