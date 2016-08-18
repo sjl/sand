@@ -16,19 +16,30 @@
 (defvar *option* nil)
 
 
+(defparameter *black-pen*
+  (make-pen :stroke (rgb 0 0 0) :fill (rgb 0.4 0.4 0.4) :weight 1 :curve-steps 50))
+
+(defparameter *red-pen*
+  (make-pen :stroke (rgb 0.6 0 0) :fill (rgb 0.9 0 0) :weight 1 :curve-steps 50))
+
+(defparameter *green-pen*
+  (make-pen :stroke (rgb 0 0.6 0) :fill (rgb 0 0.9 0) :weight 1 :curve-steps 50))
+
+(defparameter *blue-pen*
+  (make-pen :stroke (rgb 0 0 0.6) :fill (rgb 0 0 0.9) :weight 1 :curve-steps 50))
+
+
 ;;;; Utils
 (defmacro with-setup (&body body)
   `(progn
     (background (gray 1))
     ,@body))
 
-
 (defmacro in-context (&body body)
   `(prog1
     (push-matrix)
     (progn ,@body)
     (pop-matrix)))
-
 
 (defmacro scancode-case (scancode-form &rest pairs)
   (with-gensyms (scancode)
@@ -40,8 +51,13 @@
                         ,@body)))
            pairs)))))
 
+(defmacro just-once (dirty-place &body body)
+  `(when ,dirty-place
+     (setf ,dirty-place nil)
+     ,@body))
 
-;;;; Box
+
+;;;; Diamond Square
 (defparameter *world-exponent* 4)
 (defparameter *world-size* (expt 2 *world-exponent*))
 
@@ -66,64 +82,59 @@
               (/ (- v min) span)))
       (return heightmap))))
 
-
 (defun draw-hm (hm ox oy ts)
   (let ((size (first (array-dimensions hm))))
     (in-context
       (translate (* ox (* ts size))
                  (* oy (* ts size)))
       (iterate
-        (for x :from 0 :below size)
-        (iterate
-          (for y :from 0 :below size)
-          (for h = (aref hm x y))
-          (with-pen (make-pen :fill (if (<= 0.0 h 1.0)
-                                      (gray h)
-                                      (rgb 1.0 0 0)))
-            (rect (* x ts) (* y ts)
-                  ts ts))))
-      (with-pen (make-pen :fill nil :stroke (rgb 1.0 0 0))
-        ; (rect 0 0 (* ts size) (* ts size))
-        ))))
+        (for (h x y) :in-array hm)
+        (with-pen (make-pen :fill (gray h))
+          (rect (* x ts) (* y ts)
+                ts ts)))
+      (with-pen (make-pen :fill nil :stroke (rgb 1.0 0 0 0.5))
+        (rect 0 0 (* ts size) (* ts size))))))
 
 
-(defmacro just-once (done &body body)
-  `(when (not ,done)
-     (setf ,done t)
-     ,@body))
-
-
-;;;; Sketch
 (defsketch demo
-    ((width *width*) (height *height*) (y-axis :up) (title "Sketch")
+    ((width *width*) (height *height*) (y-axis :up) (title "Diamond Square")
      (copy-pixels t)
      (mouse (list 0 0))
-     (frame 0)
-     (done nil)
+     (dirty t)
      ;; Data
      (size (1+ (expt 2 4)))
      (hm (sand.terrain.diamond-square::diamond-square
            5 :tileable t :spread 0.7 :spread-reduction 0.5))
      (tile-size 3)
-     ;; Pens
-     (black-pen (make-pen :stroke (rgb 0 0 0) :fill (rgb 0.4 0.4 0.4) :weight 1 :curve-steps 50))
-     (red-pen (make-pen :stroke (rgb 0.6 0 0) :fill (rgb 0.9 0 0) :weight 1 :curve-steps 50))
-     (green-pen (make-pen :stroke (rgb 0 0.6 0) :fill (rgb 0 0.9 0) :weight 1 :curve-steps 50))
-     (blue-pen (make-pen :stroke (rgb 0 0 0.6) :fill (rgb 0 0 0.9) :weight 1 :curve-steps 50))
      )
-  (incf frame)
   ;;
-  (just-once done
+  (just-once dirty
     (with-setup
       (iterate
-        (for x :from 0 :to (floor *width* (* size tile-size)))
-        (iterate
-          (for y :from 0 :to (floor *height* (* size tile-size)))
-          (draw-hm hm x y tile-size)))))
+        (for-nested ((x :from 0 :to (floor *width* (* size tile-size)))
+                     (y :from 0 :to (floor *height* (* size tile-size)))))
+        (draw-hm hm x y tile-size))))
   ;;
 
   )
 
+;;;; Template
+(defsketch demo
+    ((width *width*) (height *height*) (y-axis :up) (title "Sketch")
+     (copy-pixels t)
+     (mouse (list 0 0))
+     (dirty t)
+     ;; Data
+     )
+  ;;
+  (just-once dirty
+    (with-setup
+      (text "Demo" (- *center-x* 23) (- *center-y* 10))
+
+      ))
+  ;;
+
+  )
 
 ;;;; Mouse
 (defun mousemove (instance x y)

@@ -174,13 +174,13 @@
                        :into reviews)
             (finally (return (format nil "~{~A~%~}" reviews)))))))
 
-(defparameter *m*
-  (build-markov-generator (concatenate 'string *hn* *wine*) 2))
+; (defparameter *m*
+;   (build-markov-generator (concatenate 'string *hn* *wine*) 2))
 
 
-(iterate (repeat 50)
-         (for sentence = (generate-sentence *m*))
-         (when (<= (length sentence) 140)
-           (terpri)
-           (terpri)
-           (princ sentence)))
+; (iterate (repeat 50)
+;          (for sentence = (generate-sentence *m*))
+;          (when (<= (length sentence) 140)
+;            (terpri)
+;            (terpri)
+;            (princ sentence)))
