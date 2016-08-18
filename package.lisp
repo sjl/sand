@@ -75,3 +75,18 @@
     #:split-sequence
     #:sand.quickutils
     #:sand.utils))
+
+(defpackage #:sand.dijkstra-maps
+  (:use
+    #:cl
+    #:cl-arrows
+    #:losh
+    #:iterate
+    #:sand.quickutils
+    #:sand.utils)
+  (:export
+    #:dijkstra-map
+    #:make-dijkstra-map
+    #:dm-maximum-value
+    #:dm-map
+    #:dm-ref))

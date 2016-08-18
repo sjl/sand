@@ -34,6 +34,7 @@
                  (:file "random-numbers")
                  (:file "ascii")
                  (:file "markov")
+                 (:file "dijkstra-maps")
                  (:module "terrain"
                   :serial t
                   :components ((:file "diamond-square")))

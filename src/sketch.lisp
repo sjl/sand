@@ -2,8 +2,9 @@
 
 ;;;; Config
 (setf *bypass-cache* t)
+(defparameter *wat* nil)
 (defparameter *width* 600)
-(defparameter *height* 400)
+(defparameter *height* 600)
 
 
 (defparameter *center-x* (/ *width* 2))
@@ -32,7 +33,7 @@
 ;;;; Utils
 (defmacro with-setup (&body body)
   `(progn
-    (background (gray 1))
+    (background (gray 1.0))
     ,@body))
 
 (defmacro in-context (&body body)
@@ -57,109 +58,127 @@
      ,@body))
 
 
-;;;; Diamond Square
-(defparameter *world-exponent* 4)
-(defparameter *world-size* (expt 2 *world-exponent*))
+;;;; Sketch
+(defparameter *tile-count* 20)
+(defparameter *tile-width* (/ *width* *tile-count*))
+(defparameter *tile-height* (/ *height* *tile-count*))
 
-(defun allocate-heightmap (size)
-  (make-array (list size size)
-    :element-type 'single-float
-    :initial-element 0.0
-    :adjustable nil))
+(defparameter *wall-pen* (make-pen :fill (gray 0.0)))
+(defparameter *floor-pen* (make-pen :fill (gray 1.0)))
+(defparameter *goal-pen* (make-pen :fill (rgb 0.0 1.0 0.0)))
 
-(defun normalize-heightmap (heightmap)
+(defun draw-map (map)
+  (iterate (for (v x y) :in-array map)
+           (with-pen (ecase v
+                       (:blank *floor-pen*)
+                       (:wall *wall-pen*)
+                       (:goal *goal-pen*))
+             (rect (* x *tile-width*)
+                   (* y *tile-height*)
+                   *tile-width*
+                   *tile-height*))))
+
+(defun draw-dijkstra (dm)
   (iterate
-    (for i :from 0 :below (array-total-size heightmap))
-    (for v = (row-major-aref heightmap i))
-    (maximize v :into max)
-    (minimize v :into min)
-    (finally
-      (iterate
-        (with span = (- max min))
-        (for i :from 0 :below (array-total-size heightmap))
-        (for v = (row-major-aref heightmap i))
-        (setf (row-major-aref heightmap i)
-              (/ (- v min) span)))
-      (return heightmap))))
+    (with max = (sand.dijkstra-maps:dm-maximum-value dm))
+    (with data = (sand.dijkstra-maps::dm-map dm))
+    (for (v x y) :in-array data)
+    (unless (= most-positive-single-float v)
+      (with-pen (make-pen :fill (rgb 1.0 0.0 0.0
+                                     (/ v max)))
+        (rect (* x *tile-width*)
+              (* y *tile-height*)
+              *tile-width*
+              *tile-height*)))))
 
-(defun draw-hm (hm ox oy ts)
-  (let ((size (first (array-dimensions hm))))
-    (in-context
-      (translate (* ox (* ts size))
-                 (* oy (* ts size)))
-      (iterate
-        (for (h x y) :in-array hm)
-        (with-pen (make-pen :fill (gray h))
-          (rect (* x ts) (* y ts)
-                ts ts)))
-      (with-pen (make-pen :fill nil :stroke (rgb 1.0 0 0 0.5))
-        (rect 0 0 (* ts size) (* ts size))))))
-
-
-(defsketch demo
-    ((width *width*) (height *height*) (y-axis :up) (title "Diamond Square")
-     (copy-pixels t)
-     (mouse (list 0 0))
-     (dirty t)
-     ;; Data
-     (size (1+ (expt 2 4)))
-     (hm (sand.terrain.diamond-square::diamond-square
-           5 :tileable t :spread 0.7 :spread-reduction 0.5))
-     (tile-size 3)
-     )
-  ;;
-  (just-once dirty
-    (with-setup
-      (iterate
-        (for-nested ((x :from 0 :to (floor *width* (* size tile-size)))
-                     (y :from 0 :to (floor *height* (* size tile-size)))))
-        (draw-hm hm x y tile-size))))
-  ;;
-
-  )
-
-;;;; Template
 (defsketch demo
     ((width *width*) (height *height*) (y-axis :up) (title "Sketch")
      (copy-pixels t)
      (mouse (list 0 0))
+     (mouse-down-left nil)
+     (mouse-down-right nil)
      (dirty t)
      ;; Data
-     )
+     (map (make-array (list *tile-count* *tile-count*)
+            :element-type t
+            :initial-element :blank))
+     (dm nil)
+     (lol (progn
+            (setf (aref map
+                        (random-range 0 *tile-count*)
+                        (random-range 0 *tile-count*))
+                  :goal)
+            )))
   ;;
   (just-once dirty
     (with-setup
-      (text "Demo" (- *center-x* 23) (- *center-y* 10))
-
-      ))
+      (setf dm (sand.dijkstra-maps::make-dijkstra-map map
+                                                      (curry #'eql :goal)
+                                                      (curry #'eql :wall)))
+      (draw-map map)
+      (draw-dijkstra dm)))
   ;;
 
   )
 
+
 ;;;; Mouse
+(defun mouse-in-bounds-p (x y)
+  (and (>= x 0)
+       (>= y 0)
+       (< x *width*)
+       (< y *height*)))
+
 (defun mousemove (instance x y)
-  (with-slots (mouse) instance
-    (setf mouse (list x (- *height* y)))
-    ;;
-    ;;
-    )
+  (when (mouse-in-bounds-p x y)
+    (with-slots (mouse) instance
+      (setf mouse (list x (- *height* y 1)))
+      ;;
+      (when (or (slot-value instance 'mouse-down-left)
+                (slot-value instance 'mouse-down-right))
+        (setf (slot-value instance 'dirty) t)
+        (let ((tx (floor x *tile-width*))
+              (ty (floor (- *height* y 1) *tile-height*)))
+          (zapf (aref (slot-value instance 'map) tx ty)
+                (if (slot-value instance 'mouse-down-left)
+                  (case %
+                    (:blank :wall)
+                    (:goal :goal)
+                    (:wall :wall))
+                  (case %
+                    (:blank :blank)
+                    (:goal :goal)
+                    (:wall :blank))))))
+      ;;
+      ))
   )
 
 
 (defun mousedown-left (instance x y)
-  (declare (ignorable instance x y))
-  )
+  (when (mouse-in-bounds-p x y)
+    (setf (slot-value instance 'mouse-down-left) t)
+    ;;
+    (mousemove instance x y)
+    ;;
+    ))
 
 (defun mousedown-right (instance x y)
-  (declare (ignorable instance x y))
-  )
+  (when (mouse-in-bounds-p x y)
+    (setf (slot-value instance 'mouse-down-right) t)
+    ;;
+    (mousemove instance x y)
+    ;;
+    ))
 
 (defun mouseup-left (instance x y)
-  (declare (ignorable instance x y))
+  (declare (ignorable x y))
+  (setf (slot-value instance 'mouse-down-left) nil)
+  ;;
   )
 
 (defun mouseup-right (instance x y)
-  (declare (ignorable instance x y))
+  (declare (ignorable x y))
+  (setf (slot-value instance 'mouse-down-right) nil)
   )
 
 
