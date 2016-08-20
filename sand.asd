@@ -31,10 +31,12 @@
    (:module "src"
     :serial t
     :components ((:file "utils")
+                 (:file "graphviz")
                  (:file "random-numbers")
                  (:file "ascii")
                  (:file "markov")
                  (:file "dijkstra-maps")
+                 (:file "binary-decision-diagrams")
                  (:module "terrain"
                   :serial t
                   :components ((:file "diamond-square")))

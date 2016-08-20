@@ -11,6 +11,7 @@
                :n-grams
                :define-constant
                :riffle
+               :tree-collect
                ; :switch
                ; :while
                ; :ensure-boolean

@@ -1,1 +1,4 @@
+syntax: glob
 scratch.lisp
+*.png
+*.dot

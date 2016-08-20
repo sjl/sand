@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:WITH-GENSYMS :ONCE-ONLY :COMPOSE :CURRY :RCURRY :N-GRAMS :DEFINE-CONSTANT :RIFFLE) :ensure-package T :package "SAND.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:WITH-GENSYMS :ONCE-ONLY :COMPOSE :CURRY :RCURRY :N-GRAMS :DEFINE-CONSTANT :RIFFLE :TREE-COLLECT) :ensure-package T :package "SAND.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "SAND.QUICKUTILS")
@@ -17,7 +17,7 @@
                                          :MAKE-GENSYM-LIST :ONCE-ONLY
                                          :ENSURE-FUNCTION :COMPOSE :CURRY
                                          :RCURRY :TAKE :N-GRAMS
-                                         :DEFINE-CONSTANT :RIFFLE))))
+                                         :DEFINE-CONSTANT :RIFFLE :TREE-COLLECT))))
 
   (deftype string-designator ()
     "A string designator type. A string designator is either a string, a symbol,
@@ -249,8 +249,27 @@ equal under `test` to result of evaluating `initial-value`."
           :when xs
             :collect obj))
   
+
+  (defun tree-collect (predicate tree)
+    "Returns a list of every node in the `tree` that satisfies the `predicate`. If there are any improper lists in the tree, the `predicate` is also applied to their dotted elements."
+    (let ((sentinel (gensym)))
+      (flet ((my-cdr (obj)
+               (cond ((consp obj)
+                      (let ((result (cdr obj)))
+                        (if (listp result)
+                            result
+                            (list result sentinel))))
+                     (t
+                      (list sentinel)))))
+        (loop :for (item . rest) :on tree :by #'my-cdr
+              :until (eq item sentinel)
+              :if (funcall predicate item) collect item
+                :else
+                  :if (listp item)
+                    :append (tree-collect predicate item)))))
+  
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (export '(with-gensyms with-unique-names once-only compose curry rcurry
-            n-grams define-constant riffle)))
+            n-grams define-constant riffle tree-collect)))
 
 ;;;; END OF quickutils.lisp ;;;;
