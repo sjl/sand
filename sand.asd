@@ -22,6 +22,7 @@
                #:html-entities
                #:plump
                #:clss
+               #:cl-algebraic-data-type
                )
 
   :serial t
