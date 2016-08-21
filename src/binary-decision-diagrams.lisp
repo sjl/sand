@@ -4,67 +4,83 @@
 (defun required ()
   (error "Argument required."))
 
-(defstruct (bdd-node (:constructor make-bdd-node (number low high)))
+
+(defstruct (bdd (:constructor %make-bdd (number low high)))
   (number (required) :type fixnum)
-  (low (required) :type (or bit bdd-node))
-  (high (required) :type (or bit bdd-node)))
+  (low (required) :type (or bit bdd))
+  (high (required) :type (or bit bdd)))
 
 (defun make-bdd (contents)
   (etypecase contents
     (bit contents)
     (cons
       (destructuring-bind (number low high) contents
-        (make-bdd-node number (make-bdd low) (make-bdd high))))))
+        (%make-bdd number (make-bdd low) (make-bdd high))))))
+
+(defmacro bdd-case (bdd
+                    ((sink) &body sink-body)
+                    ((number low high) &body node-body))
+  (once-only (bdd)
+    `(etypecase ,bdd
+      (bit (let ((,sink ,bdd))
+             (declare (ignorable ,sink))
+             ,@sink-body))
+      (bdd (with-accessors ((,number bdd-number)
+                            (,low bdd-low)
+                            (,high bdd-high))
+               ,bdd
+             ,@node-body)))))
+
 
 (defun evaluate-bdd (bdd &rest arguments)
   (recursively ((n 1)
                 (bdd bdd)
                 (argument (first arguments))
                 (remaining (rest arguments)))
-    (etypecase bdd
-      (bit bdd)
-      (bdd-node
-        (if (> (bdd-node-number bdd) n)
+    (bdd-case bdd
+      ((sink) sink)
+      ((number low high)
+       (if (> number n)
           (recur (1+ n)
                  bdd
                  argument
                  remaining)
           (recur (1+ n)
                  (if (zerop argument)
-                   (bdd-node-low bdd)
-                   (bdd-node-high bdd))
+                   low
+                   high)
                  (first remaining)
                  (rest remaining)))))))
 
+
 (defun bdd-map-nodes (function bdd)
-  (etypecase bdd
-    (bit (list (funcall function bdd)))
-    (bdd-node
-      (append (list (funcall function bdd))
-              (bdd-map-nodes function (bdd-node-low bdd))
-              (bdd-map-nodes function (bdd-node-high bdd))))))
+  (bdd-case bdd
+    ((sink)
+     (list (funcall function sink)))
+    ((n low high)
+     (append (list (funcall function bdd))
+             (bdd-map-nodes function low)
+             (bdd-map-nodes function high)))))
 
 (defun bdd-map-edges (function bdd)
-  (etypecase bdd
-    (bit nil)
-    (bdd-node
-      (let ((low (bdd-node-low bdd))
-            (high (bdd-node-high bdd)))
-        (list* (funcall function bdd low t)
-               (funcall function bdd high nil)
-               (append (bdd-map-edges function low)
-                       (bdd-map-edges function high)))))))
+  (bdd-case bdd
+    ((sink) nil)
+    ((n low high)
+     (list* (funcall function bdd low t)
+            (funcall function bdd high nil)
+            (append (bdd-map-edges function low)
+                    (bdd-map-edges function high))))))
 
 
 (defun node-label (node)
-  (etypecase node
-    (bit (if (zerop node) 'false 'true))
-    (bdd-node (bdd-node-number node))))
+  (bdd-case node
+    ((sink) (if (zerop sink) 'false 'true))
+    ((number low high) number)))
 
 (defun node-shape (node)
-  (etypecase node
-    (bit :box)
-    (bdd-node :circle)))
+  (bdd-case node
+    ((sink) :box)
+    ((n l h) :circle)))
 
 
 (defun draw-bdd (bdd &optional (path "bdd.dot"))
@@ -87,5 +103,6 @@
   (make-bdd '(1
               (2 0 (3 0 1))
               (2 (3 0 1) 1))))
+
 
 (draw-bdd *maj*)

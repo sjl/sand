@@ -35,9 +35,9 @@
   "
   (case path
     ((t) (%graphviz-digraph nodes edges))
-    ((nil) (with-output-to-string (s)
-             (let ((*standard-output* s))
-               (%graphviz-digraph nodes edges))))
-    (t (with-open-file (s path :direction :output :if-exists :supersede)
-         (let ((*standard-output* s))
-           (%graphviz-digraph nodes edges))))))
+    ((nil) (with-output-to-string (*standard-output*)
+             (%graphviz-digraph nodes edges)))
+    (t (with-open-file (*standard-output* path
+                                          :direction :output
+                                          :if-exists :supersede)
+         (%graphviz-digraph nodes edges)))))
