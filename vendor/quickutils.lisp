@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:WITH-GENSYMS :ONCE-ONLY :COMPOSE :CURRY :RCURRY :N-GRAMS :DEFINE-CONSTANT :RIFFLE :TREE-COLLECT) :ensure-package T :package "SAND.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:WITH-GENSYMS :ONCE-ONLY :COMPOSE :CURRY :RCURRY :N-GRAMS :DEFINE-CONSTANT :RIFFLE :TREE-COLLECT :ENSURE-GETHASH) :ensure-package T :package "SAND.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "SAND.QUICKUTILS")
@@ -17,7 +17,8 @@
                                          :MAKE-GENSYM-LIST :ONCE-ONLY
                                          :ENSURE-FUNCTION :COMPOSE :CURRY
                                          :RCURRY :TAKE :N-GRAMS
-                                         :DEFINE-CONSTANT :RIFFLE :TREE-COLLECT))))
+                                         :DEFINE-CONSTANT :RIFFLE :TREE-COLLECT
+                                         :ENSURE-GETHASH))))
 
   (deftype string-designator ()
     "A string designator type. A string designator is either a string, a symbol,
@@ -268,8 +269,18 @@ equal under `test` to result of evaluating `initial-value`."
                   :if (listp item)
                     :append (tree-collect predicate item)))))
   
+
+  (defmacro ensure-gethash (key hash-table &optional default)
+    "Like `gethash`, but if `key` is not found in the `hash-table` saves the `default`
+under key before returning it. Secondary return value is true if key was
+already in the table."
+    `(multiple-value-bind (value ok) (gethash ,key ,hash-table)
+       (if ok
+           (values value ok)
+           (values (setf (gethash ,key ,hash-table) ,default) nil))))
+  
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (export '(with-gensyms with-unique-names once-only compose curry rcurry
-            n-grams define-constant riffle tree-collect)))
+            n-grams define-constant riffle tree-collect ensure-gethash)))
 
 ;;;; END OF quickutils.lisp ;;;;

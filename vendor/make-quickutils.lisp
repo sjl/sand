@@ -12,6 +12,7 @@
                :define-constant
                :riffle
                :tree-collect
+               :ensure-gethash
                ; :switch
                ; :while
                ; :ensure-boolean

@@ -72,7 +72,7 @@
   (let ((nodes (make-hash-table)))
     (graphviz-digraph
       (bdd-map-nodes (lambda (node)
-                       (list (gethash-or-init node nodes (gensym))
+                       (list (ensure-gethash node nodes (gensym))
                              :label (node-label node)
                              :shape (node-shape node)))
                      bdd)
