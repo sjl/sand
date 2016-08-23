@@ -1,5 +1,40 @@
 (in-package #:sand.huffman-trees)
 
+;;;; Data ---------------------------------------------------------------------
+;;; Interface:
+;;;     Constructors: make-leaf make-node
+;;;     Generic: tree-symbols tree-weight
+;;;     Leaves: leaf-symbol leaf-weight
+;;;     Nodes: node-left node-right
+;;;
+;;; SICP's abstraction layer is a little wonky in this example:
+;;;
+;;;    (define (make-leaf symbol weight) (list 'leaf symbol weight))
+;;;    (define (leaf? object) (eq? (car object) 'leaf))
+;;;
+;;;    (define (symbol-leaf x) (cadr x))
+;;;    (define (weight-leaf x) (caddr x))
+;;;
+;;;    (define (make-code-tree left right) ...)
+;;;
+;;;    (define (left-branch tree) (car tree))
+;;;    (define (right-branch tree) (cadr tree))
+;;;
+;;;    (define (symbols tree)
+;;;      (if (leaf? tree) ...))
+;;;
+;;;    (define (weight tree)
+;;;      (if (leaf? tree) ...))
+;;;
+;;; Okay, so `symbols` and `weight` are generic functions that operate on either
+;;; kind of tree component (leaves and code trees), cool.  Their argument is
+;;; just called `tree` so that must mean "either kind of component".
+;;;
+;;; But wait, `left-branch` takes a "tree" argument, but it only works on code
+;;; trees, not leaves.  Same for `right-branch`.
+;;;
+;;; Sometimes I just want to drop everything and go write OCaml.
+
 (defstruct huffman-tree)
 
 (defstruct (leaf (:include huffman-tree)
@@ -15,12 +50,12 @@
   (weight (required-argument) :type real))
 
 
-(defun huffman-tree-symbols (tree)
+(defun tree-symbols (tree)
   (etypecase tree
     (leaf (list (leaf-symbol tree)))
     (node (node-symbols tree))))
 
-(defun huffman-tree-weight (tree)
+(defun tree-weight (tree)
   (etypecase tree
     (leaf (leaf-weight tree))
     (node (node-weight tree))))
@@ -29,12 +64,13 @@
 (defun make-node (left right)
   (%make-node :left left
               :right right
-              :weight (+ (huffman-tree-weight left)
-                         (huffman-tree-weight right))
-              :symbols (append (huffman-tree-symbols left)
-                               (huffman-tree-symbols right))))
+              :weight (+ (tree-weight left)
+                         (tree-weight right))
+              :symbols (append (tree-symbols left)
+                               (tree-symbols right))))
 
 
+;;;; External Interface -------------------------------------------------------
 (defun decode (bits tree)
   (flet ((choose-branch (bit tree)
            (ecase bit
@@ -54,7 +90,7 @@
   (cond
     ((null set)
      (list tree))
-    ((< (huffman-tree-weight tree) (huffman-tree-weight (first set)))
+    ((< (tree-weight tree) (tree-weight (first set)))
      (cons tree set))
     (t
      (cons (first set)
