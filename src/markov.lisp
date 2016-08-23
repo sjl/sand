@@ -1,6 +1,7 @@
 (in-package #:sand.markov)
 
-(defparameter *text* (slurp "data/lightships-and-lighthouses.txt"))
+(defparameter *text*
+  (read-file-into-string "data/lightships-and-lighthouses.txt"))
 
 (defclass markov ()
   ((database :initarg :database :accessor markov-database)
@@ -47,7 +48,7 @@
           (if-first-time (pushnew prefix beginnings :test 'equal))
           (vector-push-extend
             suffix
-            (gethash-or-init prefix database (make-vector))))))
+            (ensure-gethash prefix database (make-vector))))))
     (make-instance 'markov
                    :database database
                    :beginnings (coerce beginnings 'vector))))

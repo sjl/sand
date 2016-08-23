@@ -14,6 +14,9 @@
                :tree-collect
                :ensure-gethash
                :required-argument
+               :read-file-into-string
+               :hash-table-alist
+               :hash-table-plist
                ; :switch
                ; :while
                ; :ensure-boolean

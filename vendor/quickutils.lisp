@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:WITH-GENSYMS :ONCE-ONLY :COMPOSE :CURRY :RCURRY :N-GRAMS :DEFINE-CONSTANT :RIFFLE :TREE-COLLECT :ENSURE-GETHASH :REQUIRED-ARGUMENT) :ensure-package T :package "SAND.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:WITH-GENSYMS :ONCE-ONLY :COMPOSE :CURRY :RCURRY :N-GRAMS :DEFINE-CONSTANT :RIFFLE :TREE-COLLECT :ENSURE-GETHASH :REQUIRED-ARGUMENT :READ-FILE-INTO-STRING :HASH-TABLE-ALIST :HASH-TABLE-PLIST) :ensure-package T :package "SAND.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "SAND.QUICKUTILS")
@@ -18,7 +18,10 @@
                                          :ENSURE-FUNCTION :COMPOSE :CURRY
                                          :RCURRY :TAKE :N-GRAMS
                                          :DEFINE-CONSTANT :RIFFLE :TREE-COLLECT
-                                         :ENSURE-GETHASH :REQUIRED-ARGUMENT))))
+                                         :ENSURE-GETHASH :REQUIRED-ARGUMENT
+                                         :WITH-OPEN-FILE* :WITH-INPUT-FROM-FILE
+                                         :READ-FILE-INTO-STRING
+                                         :HASH-TABLE-ALIST :HASH-TABLE-PLIST))))
 
   (deftype string-designator ()
     "A string designator type. A string designator is either a string, a symbol,
@@ -286,9 +289,82 @@ use as an initialization form for structure and class-slots, and
 a default value for required keyword arguments."
     (error "Required argument ~@[~S ~]missing." name))
   
+
+  (defmacro with-open-file* ((stream filespec &key direction element-type
+                                                   if-exists if-does-not-exist external-format)
+                             &body body)
+    "Just like `with-open-file`, but `nil` values in the keyword arguments mean to use
+the default value specified for `open`."
+    (once-only (direction element-type if-exists if-does-not-exist external-format)
+      `(with-open-stream
+           (,stream (apply #'open ,filespec
+                           (append
+                            (when ,direction
+                              (list :direction ,direction))
+                            (when ,element-type
+                              (list :element-type ,element-type))
+                            (when ,if-exists
+                              (list :if-exists ,if-exists))
+                            (when ,if-does-not-exist
+                              (list :if-does-not-exist ,if-does-not-exist))
+                            (when ,external-format
+                              (list :external-format ,external-format)))))
+         ,@body)))
+  
+
+  (defmacro with-input-from-file ((stream-name file-name &rest args
+                                                         &key (direction nil direction-p)
+                                                         &allow-other-keys)
+                                  &body body)
+    "Evaluate `body` with `stream-name` to an input stream on the file
+`file-name`. `args` is sent as is to the call to `open` except `external-format`,
+which is only sent to `with-open-file` when it's not `nil`."
+    (declare (ignore direction))
+    (when direction-p
+      (error "Can't specifiy :DIRECTION for WITH-INPUT-FROM-FILE."))
+    `(with-open-file* (,stream-name ,file-name :direction :input ,@args)
+       ,@body))
+  
+
+  (defun read-file-into-string (pathname &key (buffer-size 4096) external-format)
+    "Return the contents of the file denoted by `pathname` as a fresh string.
+
+The `external-format` parameter will be passed directly to `with-open-file`
+unless it's `nil`, which means the system default."
+    (with-input-from-file
+        (file-stream pathname :external-format external-format)
+      (let ((*print-pretty* nil))
+        (with-output-to-string (datum)
+          (let ((buffer (make-array buffer-size :element-type 'character)))
+            (loop
+              :for bytes-read = (read-sequence buffer file-stream)
+              :do (write-sequence buffer datum :start 0 :end bytes-read)
+              :while (= bytes-read buffer-size)))))))
+  
+
+  (defun hash-table-alist (table)
+    "Returns an association list containing the keys and values of hash table
+`table`."
+    (let ((alist nil))
+      (maphash (lambda (k v)
+                 (push (cons k v) alist))
+               table)
+      alist))
+  
+
+  (defun hash-table-plist (table)
+    "Returns a property list containing the keys and values of hash table
+`table`."
+    (let ((plist nil))
+      (maphash (lambda (k v)
+                 (setf plist (list* k v plist)))
+               table)
+      plist))
+  
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (export '(with-gensyms with-unique-names once-only compose curry rcurry
             n-grams define-constant riffle tree-collect ensure-gethash
-            required-argument)))
+            required-argument read-file-into-string hash-table-alist
+            hash-table-plist)))
 
 ;;;; END OF quickutils.lisp ;;;;
