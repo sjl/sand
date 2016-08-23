@@ -13,6 +13,7 @@
                :riffle
                :tree-collect
                :ensure-gethash
+               :required-argument
                ; :switch
                ; :while
                ; :ensure-boolean

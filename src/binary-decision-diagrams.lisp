@@ -91,6 +91,6 @@
               (2 (3 0 1) 1))))
 
 
-(evaluate-bdd *maj* 1 0 1)
+; (evaluate-bdd *maj* 1 0 1)
 
-(draw-bdd *maj* t)
+; (draw-bdd *maj* t)

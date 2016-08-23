@@ -113,3 +113,15 @@
     #:sand.utils)
   (:export
     ))
+
+(defpackage #:sand.huffman-trees
+  (:use
+    #:cl
+    #:cl-arrows
+    #:losh
+    #:iterate
+    #:sand.graphviz
+    #:sand.quickutils
+    #:sand.utils)
+  (:export
+    ))

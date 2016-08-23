@@ -40,6 +40,7 @@
                  (:file "markov")
                  (:file "dijkstra-maps")
                  (:file "binary-decision-diagrams")
+                 (:file "huffman-trees")
                  (:module "terrain"
                   :serial t
                   :components ((:file "diamond-square")))

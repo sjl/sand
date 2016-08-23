@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:WITH-GENSYMS :ONCE-ONLY :COMPOSE :CURRY :RCURRY :N-GRAMS :DEFINE-CONSTANT :RIFFLE :TREE-COLLECT :ENSURE-GETHASH) :ensure-package T :package "SAND.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:WITH-GENSYMS :ONCE-ONLY :COMPOSE :CURRY :RCURRY :N-GRAMS :DEFINE-CONSTANT :RIFFLE :TREE-COLLECT :ENSURE-GETHASH :REQUIRED-ARGUMENT) :ensure-package T :package "SAND.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "SAND.QUICKUTILS")
@@ -18,7 +18,7 @@
                                          :ENSURE-FUNCTION :COMPOSE :CURRY
                                          :RCURRY :TAKE :N-GRAMS
                                          :DEFINE-CONSTANT :RIFFLE :TREE-COLLECT
-                                         :ENSURE-GETHASH))))
+                                         :ENSURE-GETHASH :REQUIRED-ARGUMENT))))
 
   (deftype string-designator ()
     "A string designator type. A string designator is either a string, a symbol,
@@ -279,8 +279,16 @@ already in the table."
            (values value ok)
            (values (setf (gethash ,key ,hash-table) ,default) nil))))
   
+
+  (defun required-argument (&optional name)
+    "Signals an error for a missing argument of `name`. Intended for
+use as an initialization form for structure and class-slots, and
+a default value for required keyword arguments."
+    (error "Required argument ~@[~S ~]missing." name))
+  
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (export '(with-gensyms with-unique-names once-only compose curry rcurry
-            n-grams define-constant riffle tree-collect ensure-gethash)))
+            n-grams define-constant riffle tree-collect ensure-gethash
+            required-argument)))
 
 ;;;; END OF quickutils.lisp ;;;;
