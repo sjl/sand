@@ -125,3 +125,15 @@
     #:sand.utils)
   (:export
     ))
+
+(defpackage #:sand.ffi
+  (:use
+    #:sb-alien
+    #:cl
+    #:cl-arrows
+    #:losh
+    #:iterate
+    #:sand.quickutils
+    #:sand.utils)
+  (:export
+    ))

@@ -1,7 +1,7 @@
 (in-package #:sand.markov)
 
-(defparameter *text*
-  (read-file-into-string "data/lightships-and-lighthouses.txt"))
+; (defparameter *text*
+;   (read-file-into-string "data/lightships-and-lighthouses.txt"))
 
 (defclass markov ()
   ((database :initarg :database :accessor markov-database)

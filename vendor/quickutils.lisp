@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:WITH-GENSYMS :ONCE-ONLY :COMPOSE :CURRY :RCURRY :N-GRAMS :DEFINE-CONSTANT :RIFFLE :TREE-COLLECT :ENSURE-GETHASH :REQUIRED-ARGUMENT :READ-FILE-INTO-STRING :HASH-TABLE-ALIST :HASH-TABLE-PLIST) :ensure-package T :package "SAND.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :CURRY :DEFINE-CONSTANT :ENSURE-GETHASH :HASH-TABLE-ALIST :HASH-TABLE-PLIST :HASH-TABLE-KEYS :HASH-TABLE-VALUES :N-GRAMS :ONCE-ONLY :RCURRY :READ-FILE-INTO-STRING :REQUIRED-ARGUMENT :RIFFLE :TREE-COLLECT :WITH-GENSYMS) :ensure-package T :package "SAND.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "SAND.QUICKUTILS")
@@ -13,59 +13,18 @@
 (in-package "SAND.QUICKUTILS")
 
 (when (boundp '*utilities*)
-  (setf *utilities* (union *utilities* '(:STRING-DESIGNATOR :WITH-GENSYMS
-                                         :MAKE-GENSYM-LIST :ONCE-ONLY
-                                         :ENSURE-FUNCTION :COMPOSE :CURRY
-                                         :RCURRY :TAKE :N-GRAMS
-                                         :DEFINE-CONSTANT :RIFFLE :TREE-COLLECT
-                                         :ENSURE-GETHASH :REQUIRED-ARGUMENT
-                                         :WITH-OPEN-FILE* :WITH-INPUT-FROM-FILE
+  (setf *utilities* (union *utilities* '(:MAKE-GENSYM-LIST :ENSURE-FUNCTION
+                                         :COMPOSE :CURRY :DEFINE-CONSTANT
+                                         :ENSURE-GETHASH :HASH-TABLE-ALIST
+                                         :HASH-TABLE-PLIST :MAPHASH-KEYS
+                                         :HASH-TABLE-KEYS :MAPHASH-VALUES
+                                         :HASH-TABLE-VALUES :TAKE :N-GRAMS
+                                         :ONCE-ONLY :RCURRY :WITH-OPEN-FILE*
+                                         :WITH-INPUT-FROM-FILE
                                          :READ-FILE-INTO-STRING
-                                         :HASH-TABLE-ALIST :HASH-TABLE-PLIST))))
-
-  (deftype string-designator ()
-    "A string designator type. A string designator is either a string, a symbol,
-or a character."
-    `(or symbol string character))
-  
-
-  (defmacro with-gensyms (names &body forms)
-    "Binds each variable named by a symbol in `names` to a unique symbol around
-`forms`. Each of `names` must either be either a symbol, or of the form:
-
-    (symbol string-designator)
-
-Bare symbols appearing in `names` are equivalent to:
-
-    (symbol symbol)
-
-The string-designator is used as the argument to `gensym` when constructing the
-unique symbol the named variable will be bound to."
-    `(let ,(mapcar (lambda (name)
-                     (multiple-value-bind (symbol string)
-                         (etypecase name
-                           (symbol
-                            (values name (symbol-name name)))
-                           ((cons symbol (cons string-designator null))
-                            (values (first name) (string (second name)))))
-                       `(,symbol (gensym ,string))))
-            names)
-       ,@forms))
-
-  (defmacro with-unique-names (names &body forms)
-    "Binds each variable named by a symbol in `names` to a unique symbol around
-`forms`. Each of `names` must either be either a symbol, or of the form:
-
-    (symbol string-designator)
-
-Bare symbols appearing in `names` are equivalent to:
-
-    (symbol symbol)
-
-The string-designator is used as the argument to `gensym` when constructing the
-unique symbol the named variable will be bound to."
-    `(with-gensyms ,names ,@forms))
-  
+                                         :REQUIRED-ARGUMENT :RIFFLE
+                                         :TREE-COLLECT :STRING-DESIGNATOR
+                                         :WITH-GENSYMS))))
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun make-gensym-list (length &optional (x "G"))
     "Returns a list of `length` gensyms, each generated as if with a call to `make-gensym`,
@@ -74,45 +33,6 @@ using the second (optional, defaulting to `\"G\"`) argument."
       (loop repeat length
             collect (gensym g))))
   )                                        ; eval-when
-
-  (defmacro once-only (specs &body forms)
-    "Evaluates `forms` with symbols specified in `specs` rebound to temporary
-variables, ensuring that each initform is evaluated only once.
-
-Each of `specs` must either be a symbol naming the variable to be rebound, or of
-the form:
-
-    (symbol initform)
-
-Bare symbols in `specs` are equivalent to
-
-    (symbol symbol)
-
-Example:
-
-    (defmacro cons1 (x) (once-only (x) `(cons ,x ,x)))
-      (let ((y 0)) (cons1 (incf y))) => (1 . 1)"
-    (let ((gensyms (make-gensym-list (length specs) "ONCE-ONLY"))
-          (names-and-forms (mapcar (lambda (spec)
-                                     (etypecase spec
-                                       (list
-                                        (destructuring-bind (name form) spec
-                                          (cons name form)))
-                                       (symbol
-                                        (cons spec spec))))
-                                   specs)))
-      ;; bind in user-macro
-      `(let ,(mapcar (lambda (g n) (list g `(gensym ,(string (car n)))))
-              gensyms names-and-forms)
-         ;; bind in final expansion
-         `(let (,,@(mapcar (lambda (g n)
-                             ``(,,g ,,(cdr n)))
-                           gensyms names-and-forms))
-            ;; bind in user-macro
-            ,(let ,(mapcar (lambda (n g) (list (car n) g))
-                    names-and-forms gensyms)
-               ,@forms)))))
-  
 (eval-when (:compile-toplevel :load-toplevel :execute)
   ;;; To propagate return type and allow the compiler to eliminate the IF when
   ;;; it is known if the argument is function or not.
@@ -178,37 +98,6 @@ it is called with to `function`."
            (apply ,fun ,@curries more)))))
   
 
-  (defun rcurry (function &rest arguments)
-    "Returns a function that applies the arguments it is called
-with and `arguments` to `function`."
-    (declare (optimize (speed 3) (safety 1) (debug 1)))
-    (let ((fn (ensure-function function)))
-      (lambda (&rest more)
-        (declare (dynamic-extent more))
-        (multiple-value-call fn (values-list more) (values-list arguments)))))
-  
-
-  (defun take (n sequence)
-    "Take the first `n` elements from `sequence`."
-    (subseq sequence 0 n))
-  
-
-  (defun n-grams (n sequence)
-    "Find all `n`-grams of the sequence `sequence`."
-    (assert (and (plusp n)
-                 (<= n (length sequence))))
-    
-    (etypecase sequence
-      ;; Lists
-      (list (loop :repeat (1+ (- (length sequence) n))
-                  :for seq :on sequence
-                  :collect (take n seq)))
-      
-      ;; General sequences
-      (sequence (loop :for i :to (- (length sequence) n)
-                      :collect (subseq sequence i (+ i n))))))
-  
-
   (defun %reevaluate-constant (name value test)
     (if (not (boundp name))
         value
@@ -246,33 +135,6 @@ equal under `test` to result of evaluating `initial-value`."
        ,@(when documentation `(,documentation))))
   
 
-  (defun riffle (list obj)
-    "Insert the item `obj` in between each element of `list`."
-    (loop :for (x . xs) :on list
-          :collect x
-          :when xs
-            :collect obj))
-  
-
-  (defun tree-collect (predicate tree)
-    "Returns a list of every node in the `tree` that satisfies the `predicate`. If there are any improper lists in the tree, the `predicate` is also applied to their dotted elements."
-    (let ((sentinel (gensym)))
-      (flet ((my-cdr (obj)
-               (cond ((consp obj)
-                      (let ((result (cdr obj)))
-                        (if (listp result)
-                            result
-                            (list result sentinel))))
-                     (t
-                      (list sentinel)))))
-        (loop :for (item . rest) :on tree :by #'my-cdr
-              :until (eq item sentinel)
-              :if (funcall predicate item) collect item
-                :else
-                  :if (listp item)
-                    :append (tree-collect predicate item)))))
-  
-
   (defmacro ensure-gethash (key hash-table &optional default)
     "Like `gethash`, but if `key` is not found in the `hash-table` saves the `default`
 under key before returning it. Secondary return value is true if key was
@@ -283,11 +145,130 @@ already in the table."
            (values (setf (gethash ,key ,hash-table) ,default) nil))))
   
 
-  (defun required-argument (&optional name)
-    "Signals an error for a missing argument of `name`. Intended for
-use as an initialization form for structure and class-slots, and
-a default value for required keyword arguments."
-    (error "Required argument ~@[~S ~]missing." name))
+  (defun hash-table-alist (table)
+    "Returns an association list containing the keys and values of hash table
+`table`."
+    (let ((alist nil))
+      (maphash (lambda (k v)
+                 (push (cons k v) alist))
+               table)
+      alist))
+  
+
+  (defun hash-table-plist (table)
+    "Returns a property list containing the keys and values of hash table
+`table`."
+    (let ((plist nil))
+      (maphash (lambda (k v)
+                 (setf plist (list* k v plist)))
+               table)
+      plist))
+  
+
+  (declaim (inline maphash-keys))
+  (defun maphash-keys (function table)
+    "Like `maphash`, but calls `function` with each key in the hash table `table`."
+    (maphash (lambda (k v)
+               (declare (ignore v))
+               (funcall function k))
+             table))
+  
+
+  (defun hash-table-keys (table)
+    "Returns a list containing the keys of hash table `table`."
+    (let ((keys nil))
+      (maphash-keys (lambda (k)
+                      (push k keys))
+                    table)
+      keys))
+  
+
+  (declaim (inline maphash-values))
+  (defun maphash-values (function table)
+    "Like `maphash`, but calls `function` with each value in the hash table `table`."
+    (maphash (lambda (k v)
+               (declare (ignore k))
+               (funcall function v))
+             table))
+  
+
+  (defun hash-table-values (table)
+    "Returns a list containing the values of hash table `table`."
+    (let ((values nil))
+      (maphash-values (lambda (v)
+                        (push v values))
+                      table)
+      values))
+  
+
+  (defun take (n sequence)
+    "Take the first `n` elements from `sequence`."
+    (subseq sequence 0 n))
+  
+
+  (defun n-grams (n sequence)
+    "Find all `n`-grams of the sequence `sequence`."
+    (assert (and (plusp n)
+                 (<= n (length sequence))))
+    
+    (etypecase sequence
+      ;; Lists
+      (list (loop :repeat (1+ (- (length sequence) n))
+                  :for seq :on sequence
+                  :collect (take n seq)))
+      
+      ;; General sequences
+      (sequence (loop :for i :to (- (length sequence) n)
+                      :collect (subseq sequence i (+ i n))))))
+  
+
+  (defmacro once-only (specs &body forms)
+    "Evaluates `forms` with symbols specified in `specs` rebound to temporary
+variables, ensuring that each initform is evaluated only once.
+
+Each of `specs` must either be a symbol naming the variable to be rebound, or of
+the form:
+
+    (symbol initform)
+
+Bare symbols in `specs` are equivalent to
+
+    (symbol symbol)
+
+Example:
+
+    (defmacro cons1 (x) (once-only (x) `(cons ,x ,x)))
+      (let ((y 0)) (cons1 (incf y))) => (1 . 1)"
+    (let ((gensyms (make-gensym-list (length specs) "ONCE-ONLY"))
+          (names-and-forms (mapcar (lambda (spec)
+                                     (etypecase spec
+                                       (list
+                                        (destructuring-bind (name form) spec
+                                          (cons name form)))
+                                       (symbol
+                                        (cons spec spec))))
+                                   specs)))
+      ;; bind in user-macro
+      `(let ,(mapcar (lambda (g n) (list g `(gensym ,(string (car n)))))
+              gensyms names-and-forms)
+         ;; bind in final expansion
+         `(let (,,@(mapcar (lambda (g n)
+                             ``(,,g ,,(cdr n)))
+                           gensyms names-and-forms))
+            ;; bind in user-macro
+            ,(let ,(mapcar (lambda (n g) (list (car n) g))
+                    names-and-forms gensyms)
+               ,@forms)))))
+  
+
+  (defun rcurry (function &rest arguments)
+    "Returns a function that applies the arguments it is called
+with and `arguments` to `function`."
+    (declare (optimize (speed 3) (safety 1) (debug 1)))
+    (let ((fn (ensure-function function)))
+      (lambda (&rest more)
+        (declare (dynamic-extent more))
+        (multiple-value-call fn (values-list more) (values-list arguments)))))
   
 
   (defmacro with-open-file* ((stream filespec &key direction element-type
@@ -342,29 +323,87 @@ unless it's `nil`, which means the system default."
               :while (= bytes-read buffer-size)))))))
   
 
-  (defun hash-table-alist (table)
-    "Returns an association list containing the keys and values of hash table
-`table`."
-    (let ((alist nil))
-      (maphash (lambda (k v)
-                 (push (cons k v) alist))
-               table)
-      alist))
+  (defun required-argument (&optional name)
+    "Signals an error for a missing argument of `name`. Intended for
+use as an initialization form for structure and class-slots, and
+a default value for required keyword arguments."
+    (error "Required argument ~@[~S ~]missing." name))
   
 
-  (defun hash-table-plist (table)
-    "Returns a property list containing the keys and values of hash table
-`table`."
-    (let ((plist nil))
-      (maphash (lambda (k v)
-                 (setf plist (list* k v plist)))
-               table)
-      plist))
+  (defun riffle (list obj)
+    "Insert the item `obj` in between each element of `list`."
+    (loop :for (x . xs) :on list
+          :collect x
+          :when xs
+            :collect obj))
+  
+
+  (defun tree-collect (predicate tree)
+    "Returns a list of every node in the `tree` that satisfies the `predicate`. If there are any improper lists in the tree, the `predicate` is also applied to their dotted elements."
+    (let ((sentinel (gensym)))
+      (flet ((my-cdr (obj)
+               (cond ((consp obj)
+                      (let ((result (cdr obj)))
+                        (if (listp result)
+                            result
+                            (list result sentinel))))
+                     (t
+                      (list sentinel)))))
+        (loop :for (item . rest) :on tree :by #'my-cdr
+              :until (eq item sentinel)
+              :if (funcall predicate item) collect item
+                :else
+                  :if (listp item)
+                    :append (tree-collect predicate item)))))
+  
+
+  (deftype string-designator ()
+    "A string designator type. A string designator is either a string, a symbol,
+or a character."
+    `(or symbol string character))
+  
+
+  (defmacro with-gensyms (names &body forms)
+    "Binds each variable named by a symbol in `names` to a unique symbol around
+`forms`. Each of `names` must either be either a symbol, or of the form:
+
+    (symbol string-designator)
+
+Bare symbols appearing in `names` are equivalent to:
+
+    (symbol symbol)
+
+The string-designator is used as the argument to `gensym` when constructing the
+unique symbol the named variable will be bound to."
+    `(let ,(mapcar (lambda (name)
+                     (multiple-value-bind (symbol string)
+                         (etypecase name
+                           (symbol
+                            (values name (symbol-name name)))
+                           ((cons symbol (cons string-designator null))
+                            (values (first name) (string (second name)))))
+                       `(,symbol (gensym ,string))))
+            names)
+       ,@forms))
+
+  (defmacro with-unique-names (names &body forms)
+    "Binds each variable named by a symbol in `names` to a unique symbol around
+`forms`. Each of `names` must either be either a symbol, or of the form:
+
+    (symbol string-designator)
+
+Bare symbols appearing in `names` are equivalent to:
+
+    (symbol symbol)
+
+The string-designator is used as the argument to `gensym` when constructing the
+unique symbol the named variable will be bound to."
+    `(with-gensyms ,names ,@forms))
   
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (export '(with-gensyms with-unique-names once-only compose curry rcurry
-            n-grams define-constant riffle tree-collect ensure-gethash
-            required-argument read-file-into-string hash-table-alist
-            hash-table-plist)))
+  (export '(compose curry define-constant ensure-gethash hash-table-alist
+            hash-table-plist hash-table-keys hash-table-values n-grams
+            once-only rcurry read-file-into-string required-argument riffle
+            tree-collect with-gensyms with-unique-names)))
 
 ;;;; END OF quickutils.lisp ;;;;

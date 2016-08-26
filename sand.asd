@@ -39,6 +39,7 @@
                  (:file "ascii")
                  (:file "markov")
                  (:file "dijkstra-maps")
+                 (:file "ffi")
                  (:file "binary-decision-diagrams")
                  (:file "huffman-trees")
                  (:module "terrain"
