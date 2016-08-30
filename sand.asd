@@ -23,6 +23,7 @@
                #:plump
                #:clss
                #:cl-algebraic-data-type
+               #:rs-colors
                )
 
   :serial t
@@ -39,9 +40,10 @@
                  (:file "ascii")
                  (:file "markov")
                  (:file "dijkstra-maps")
-                 (:file "ffi")
+                 #+sbcl (:file "ffi")
                  (:file "binary-decision-diagrams")
                  (:file "huffman-trees")
+                 (:file "color-difference")
                  (:module "terrain"
                   :serial t
                   :components ((:file "diamond-square")))

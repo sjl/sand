@@ -59,38 +59,6 @@
 
 
 ;;;; Sketch
-(defparameter *tile-count* 20)
-(defparameter *tile-width* (/ *width* *tile-count*))
-(defparameter *tile-height* (/ *height* *tile-count*))
-
-(defparameter *wall-pen* (make-pen :fill (gray 0.0)))
-(defparameter *floor-pen* (make-pen :fill (gray 1.0)))
-(defparameter *goal-pen* (make-pen :fill (rgb 0.0 1.0 0.0)))
-
-(defun draw-map (map)
-  (iterate (for (v x y) :in-array map)
-           (with-pen (ecase v
-                       (:blank *floor-pen*)
-                       (:wall *wall-pen*)
-                       (:goal *goal-pen*))
-             (rect (* x *tile-width*)
-                   (* y *tile-height*)
-                   *tile-width*
-                   *tile-height*))))
-
-(defun draw-dijkstra (dm)
-  (iterate
-    (with max = (sand.dijkstra-maps:dm-maximum-value dm))
-    (with data = (sand.dijkstra-maps::dm-map dm))
-    (for (v x y) :in-array data)
-    (unless (= most-positive-single-float v)
-      (with-pen (make-pen :fill (rgb 1.0 0.0 0.0
-                                     (/ v max)))
-        (rect (* x *tile-width*)
-              (* y *tile-height*)
-              *tile-width*
-              *tile-height*)))))
-
 (defsketch demo
     ((width *width*) (height *height*) (y-axis :up) (title "Sketch")
      (copy-pixels t)
@@ -99,24 +67,33 @@
      (mouse-down-right nil)
      (dirty t)
      ;; Data
-     (map (make-array (list *tile-count* *tile-count*)
-            :element-type t
-            :initial-element :blank))
-     (dm nil)
+     (palette (iterate (repeat 45)
+                       (collect (rgb (random 1.0) (random 1.0) (random 1.0)))))
+     (ideal (rgb (random 1.0) (random 1.0) (random 1.0)))
      (lol (progn
-            (setf (aref map
-                        (random-range 0 *tile-count*)
-                        (random-range 0 *tile-count*))
-                  :goal)
+
             )))
   ;;
   (just-once dirty
     (with-setup
-      (setf dm (sand.dijkstra-maps::make-dijkstra-map map
-                                                      (curry #'eql :goal)
-                                                      (curry #'eql :wall)))
-      (draw-map map)
-      (draw-dijkstra dm)))
+      (iterate
+        (with tile-size = 40)
+        (with tile-count = (/ *width* tile-size))
+        (for-nested ((y :from 0 :below 100)
+                     (x :from 0 :below tile-count)))
+        (for color :in palette)
+        (with-pen (make-pen :fill color)
+          (rect (* x tile-size) (* y tile-size) tile-size tile-size)))
+      (text "Ideal Color" 0 (- *center-y* 20))
+      (with-pen (make-pen :fill ideal)
+        (rect 0 *center-y*
+              (- (/ *width* 2) 10)
+              (/ *height* 2)))
+      (text "Closest Color" (+ 10 *center-x*) (- *center-y* 20))
+      (with-pen (make-pen :fill (gray 0.5))
+        (rect (+ 10 *center-x*) *center-y*
+              (- (/ *width* 2) 10)
+              (/ *height* 2)))))
   ;;
 
   )
@@ -134,21 +111,7 @@
     (with-slots (mouse) instance
       (setf mouse (list x (- *height* y 1)))
       ;;
-      (when (or (slot-value instance 'mouse-down-left)
-                (slot-value instance 'mouse-down-right))
-        (setf (slot-value instance 'dirty) t)
-        (let ((tx (floor x *tile-width*))
-              (ty (floor (- *height* y 1) *tile-height*)))
-          (zapf (aref (slot-value instance 'map) tx ty)
-                (if (slot-value instance 'mouse-down-left)
-                  (case %
-                    (:blank :wall)
-                    (:goal :goal)
-                    (:wall :wall))
-                  (case %
-                    (:blank :blank)
-                    (:goal :goal)
-                    (:wall :blank))))))
+      
       ;;
       ))
   )

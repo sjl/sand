@@ -126,6 +126,7 @@
   (:export
     ))
 
+#+sbcl
 (defpackage #:sand.ffi
   (:use
     #:sb-alien
@@ -137,3 +138,16 @@
     #:sand.utils)
   (:export
     ))
+
+(defpackage #:sand.color-difference
+  (:use
+    #:cl
+    #:cl-arrows
+    #:losh
+    #:iterate
+    #:rs-colors
+    #:sand.quickutils
+    #:sand.utils)
+  (:export
+    ))
+

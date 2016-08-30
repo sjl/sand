@@ -36,10 +36,10 @@
 
 
 
-(linenoise-history-set-max-len 10)
-(linenoise-history-add "Alice")
-(linenoise-history-add "Bob")
-(iterate (for i :from 0 :to 20)
-         (linenoise-history-add (format nil "history entry ~d" i)))
-(linenoise "? ")
+; (linenoise-history-set-max-len 10)
+; (linenoise-history-add "Alice")
+; (linenoise-history-add "Bob")
+; (iterate (for i :from 0 :to 20)
+;          (linenoise-history-add (format nil "history entry ~d" i)))
+; (linenoise "? ")
 
