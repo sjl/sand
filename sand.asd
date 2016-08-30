@@ -24,6 +24,7 @@
                #:clss
                #:cl-algebraic-data-type
                #:rs-colors
+               #:cffi
                )
 
   :serial t

@@ -129,11 +129,11 @@
 #+sbcl
 (defpackage #:sand.ffi
   (:use
-    #:sb-alien
     #:cl
     #:cl-arrows
     #:losh
     #:iterate
+    #:cffi
     #:sand.quickutils
     #:sand.utils)
   (:export
