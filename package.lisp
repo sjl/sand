@@ -13,6 +13,18 @@
   (:shadowing-import-from #:cl-arrows
     #:->))
 
+(defpackage #:sand.primes
+  (:use
+    #:cl
+    #:cl-arrows
+    #:losh
+    #:iterate
+    #:sand.graphviz
+    #:sand.quickutils
+    #:sand.utils)
+  (:export
+    #:primep))
+
 (defpackage #:sand.random-numbers
   (:use
     #:cl
@@ -121,6 +133,18 @@
     #:losh
     #:iterate
     #:sand.graphviz
+    #:sand.quickutils
+    #:sand.utils)
+  (:export
+    ))
+
+(defpackage #:sand.streams
+  (:use
+    #:cl
+    #:cl-arrows
+    #:losh
+    #:iterate
+    #:sand.primes
     #:sand.quickutils
     #:sand.utils)
   (:export

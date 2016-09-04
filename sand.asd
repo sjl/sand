@@ -36,6 +36,7 @@
    (:module "src"
     :serial t
     :components ((:file "utils")
+                 (:file "primes")
                  (:file "graphviz")
                  (:file "random-numbers")
                  (:file "ascii")
@@ -44,6 +45,7 @@
                  #+sbcl (:file "ffi")
                  (:file "binary-decision-diagrams")
                  (:file "huffman-trees")
+                 (:file "streams")
                  (:file "color-difference")
                  (:module "terrain"
                   :serial t
