@@ -19,7 +19,6 @@
     #:cl-arrows
     #:losh
     #:iterate
-    #:sand.graphviz
     #:sand.quickutils
     #:sand.utils)
   (:export
