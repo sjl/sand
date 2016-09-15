@@ -1,7 +1,7 @@
 (in-package #:sand.sketch)
 
 ;;;; Config
-(setf *bypass-cache* t)
+; (setf *bypass-cache* t)
 (defparameter *wat* nil)
 (defparameter *width* 600)
 (defparameter *height* 600)

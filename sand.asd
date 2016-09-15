@@ -16,6 +16,7 @@
                #:sketch
                #:losh
                #:drakma
+               #:function-cache
                #:yason
                #:flexi-streams
                #:sanitize
@@ -25,6 +26,7 @@
                #:cl-algebraic-data-type
                #:rs-colors
                #:cffi
+               #+sbcl #:sb-sprof
                )
 
   :serial t
@@ -43,10 +45,12 @@
                  (:file "markov")
                  (:file "dijkstra-maps")
                  #+sbcl (:file "ffi")
+                 #+sbcl (:file "profiling")
                  (:file "binary-decision-diagrams")
                  (:file "huffman-trees")
                  (:file "streams")
                  (:file "color-difference")
+                 (:file "number-letters")
                  (:module "terrain"
                   :serial t
                   :components ((:file "diamond-square")))

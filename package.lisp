@@ -174,3 +174,31 @@
   (:export
     ))
 
+
+#+sbcl
+(defpackage #:sand.profiling
+  (:use
+    #:cl
+    #:cl-arrows
+    #:losh
+    #:iterate
+    #:sand.quickutils
+    #:sand.utils)
+  (:export
+    #:start-profiling
+    #:stop-profiling
+    #:profile))
+
+
+(defpackage #:sand.number-letters
+  (:use
+    #:cl
+    #:cl-arrows
+    #:losh
+    #:iterate
+    #:function-cache
+    #:sand.quickutils
+    #:sand.utils)
+  (:export
+    ))
+
