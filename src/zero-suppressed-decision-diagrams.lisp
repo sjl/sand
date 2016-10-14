@@ -67,18 +67,18 @@
              (enumerate-zdd low)))))
 
 
-(zdd-union (zdd-union (zdd-with 2) (zdd-with 1))
-           (zdd-adjoin
-             (zdd-union (zdd-union (zdd-with 2) (zdd-with 3))
-                        (zdd-union (zdd-with 1) (zdd-with 3)))
-             2))
+; (zdd-union (zdd-union (zdd-with 2) (zdd-with 1))
+;            (zdd-adjoin
+;              (zdd-union (zdd-union (zdd-with 2) (zdd-with 3))
+;                         (zdd-union (zdd-with 1) (zdd-with 3)))
+;              2))
 
-(zdd-adjoin
-  (zdd-union (zdd-union (zdd-with 2) (zdd-with 3))
-             (zdd-union (zdd-with 1) (zdd-with 3)))
-  2)
+; (zdd-adjoin
+;   (zdd-union (zdd-union (zdd-with 2) (zdd-with 3))
+;              (zdd-union (zdd-with 1) (zdd-with 3)))
+;   2)
 
-(zdd-disjoin * 2)
+; (zdd-disjoin * 2)
 
 
-(enumerate-zdd *)
+; (enumerate-zdd *)

@@ -53,6 +53,7 @@
                  (:file "streams")
                  (:file "color-difference")
                  (:file "number-letters")
+                 (:file "rubiks")
                  (:module "terrain"
                   :serial t
                   :components ((:file "diamond-square")))

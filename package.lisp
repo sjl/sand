@@ -164,6 +164,17 @@
   (:export
     ))
 
+(defpackage #:sand.rubiks
+  (:use
+    #:cl
+    #:cl-arrows
+    #:losh
+    #:iterate
+    #:sand.quickutils
+    #:sand.utils)
+  (:export
+    ))
+
 (defpackage #:sand.streams
   (:use
     #:cl
