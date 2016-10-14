@@ -2,8 +2,6 @@
 
 ; https://www.youtube.com/watch?v=LYKn0yUTIU4
 
-(declaim (optimize (debug 0) (safety 1) (speed 3)))
-
 
 ;;;; Slow/Reference Implementation --------------------------------------------
 (defun number-string (n)
@@ -14,7 +12,7 @@
 
 
 ;;;; Fast Version -------------------------------------------------------------
-(define-constant +small-counts+
+(defparameter *small-counts*
   (make-array 1000
     :element-type 'fixnum
     :initial-contents (iterate (for i :from 0 :below 1000)
@@ -25,8 +23,7 @@
         (iterate (for i :from 1 :to 21)
                  (collect (subseq (format nil "~R" (expt 1000 i)) 4)))))
 
-(define-constant +suffix-lengths+ (mapcar #'length *suffixes*)
-  :test #'equal)
+(defparameter *suffix-lengths* (mapcar #'length *suffixes*))
 
 
 (declaim (ftype (function ((integer 0)) fixnum)
@@ -37,12 +34,12 @@
     4
     (iterate
       (for i :first n :then (floor i 1000))
-      (for sl :in +suffix-lengths+)
+      (for sl :in *suffix-lengths*)
       (while (not (zerop i)))
       (for part = (mod i 1000))
       (when (not (zerop part))
         (sum sl)
-        (sum (aref +small-counts+ part))))))
+        (sum (aref *small-counts* part))))))
 
 (defun sanity-check ()
   (iterate (for i :from 1 :to 10000000)
@@ -63,11 +60,11 @@
       (print-chain lc))))
 
 
-(define-constant +cache-size+ 1000)
-(define-constant +cache+
-  (make-array +cache-size+
+(defparameter *cache-size* 1000)
+(defparameter *cache*
+  (make-array *cache-size*
     :element-type 'fixnum
-    :initial-contents (iterate (for i :from 0 :below +cache-size+)
+    :initial-contents (iterate (for i :from 0 :below *cache-size*)
                                (collect (chain-length i)))))
 
 (defun chain-length% (n)
@@ -75,8 +72,8 @@
     (for i :first n :then (fast-letter-count i))
     (summing 1 :into result)
     (declare (type fixnum result))
-    (when (< i +cache-size+)
-      (return (the fixnum (+ result (aref +cache+ i)))))))
+    (when (< i *cache-size*)
+      (return (the fixnum (* result (aref *cache+ i)))))))
 
 
 (defun longest-chain (max)

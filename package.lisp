@@ -75,7 +75,10 @@
     #:sand.quickutils
     #:sand.utils)
   (:shadowing-import-from #:iterate
-    #:in))
+    #:in)
+  (:shadowing-import-from #:sketch
+    #:degrees
+    #:radians))
 
 (defpackage #:sand.markov
   (:use
@@ -102,6 +105,17 @@
     #:dm-map
     #:dm-ref))
 
+(defpackage #:sand.graphs
+  (:use
+    #:cl
+    #:cl-arrows
+    #:losh
+    #:iterate
+    #:sand.quickutils
+    #:sand.utils)
+  (:export
+    ))
+
 (defpackage #:sand.graphviz
   (:use
     #:cl
@@ -124,6 +138,19 @@
     #:sand.utils)
   (:export
     ))
+
+(defpackage #:sand.zero-suppressed-decision-diagrams
+  (:use
+    #:cl
+    #:cl-arrows
+    #:losh
+    #:iterate
+    #:sand.graphviz
+    #:sand.quickutils
+    #:sand.utils)
+  (:export
+    )
+  (:nicknames #:sand.zdd))
 
 (defpackage #:sand.huffman-trees
   (:use

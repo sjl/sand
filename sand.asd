@@ -39,6 +39,7 @@
     :serial t
     :components ((:file "utils")
                  (:file "primes")
+                 (:file "graphs")
                  (:file "graphviz")
                  (:file "random-numbers")
                  (:file "ascii")
@@ -47,6 +48,7 @@
                  #+sbcl (:file "ffi")
                  #+sbcl (:file "profiling")
                  (:file "binary-decision-diagrams")
+                 (:file "zero-suppressed-decision-diagrams")
                  (:file "huffman-trees")
                  (:file "streams")
                  (:file "color-difference")

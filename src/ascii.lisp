@@ -110,8 +110,11 @@
     (negatef (getf *ball* :vx)))
   (setf (getf *ball* :y) (truncate (/ *height* 2))))
 
+(defparameter *input* nil)
 (defun handle-input ()
   (let ((input (charms:get-char charms:*standard-window* :ignore-error t)))
+    (when input
+      (push input *input*))
     (case input
       ((nil) nil)
       (#\q (setf *running* nil)))))
