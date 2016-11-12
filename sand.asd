@@ -41,6 +41,7 @@
                  (:file "primes")
                  (:file "graphs")
                  (:file "graphviz")
+                 (:file "urn")
                  (:file "random-numbers")
                  (:file "ascii")
                  (:file "markov")
@@ -53,7 +54,6 @@
                  (:file "streams")
                  (:file "color-difference")
                  (:file "number-letters")
-                 (:file "rubiks")
                  (:module "terrain"
                   :serial t
                   :components ((:file "diamond-square")))

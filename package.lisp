@@ -1,242 +1,243 @@
 ; (rename-package :charms :hunchentoot '(:ht))
 
 
-(defpackage #:sand.utils
+(defpackage :sand.utils
   (:use
-    #:cl
-    #:losh
-    #:iterate
-    #:cl-arrows
-    #:sand.quickutils)
+    :cl
+    :losh
+    :iterate
+    :cl-arrows
+    :sand.quickutils)
   (:export
-    #:average4)
-  (:shadowing-import-from #:cl-arrows
-    #:->))
+    :average4)
+  (:shadowing-import-from :cl-arrows
+    :->))
 
-(defpackage #:sand.primes
+(defpackage :sand.primes
   (:use
-    #:cl
-    #:cl-arrows
-    #:losh
-    #:iterate
-    #:sand.quickutils
-    #:sand.utils)
+    :cl
+    :cl-arrows
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils)
   (:export
-    #:primep))
+    :primep))
 
-(defpackage #:sand.random-numbers
+(defpackage :sand.random-numbers
   (:use
-    #:cl
-    #:losh
-    #:iterate
-    #:cl-arrows
-    #:sand.quickutils
-    #:sand.utils)
-  (:shadowing-import-from #:cl-arrows
-    #:->))
+    :cl
+    :losh
+    :iterate
+    :cl-arrows
+    :sand.quickutils
+    :sand.utils)
+  (:shadowing-import-from :cl-arrows
+    :->))
 
-(defpackage #:sand.parenscript
+(defpackage :sand.parenscript
   (:use
-    #:cl
-    #:losh
-    #:sand.quickutils
-    #:cl-arrows
-    #:cl-fad
-    #:parenscript)
-  (:shadowing-import-from #:cl-arrows
-    #:->)
-  (:shadowing-import-from #:losh
-    #:%))
+    :cl
+    :losh
+    :sand.quickutils
+    :cl-arrows
+    :cl-fad
+    :parenscript)
+  (:shadowing-import-from :cl-arrows
+    :->)
+  (:shadowing-import-from :losh
+    :%))
 
-(defpackage #:sand.ascii
+(defpackage :sand.ascii
   (:use
-    #:cl
-    #:losh
-    #:iterate
-    #:cl-arrows
-    #:sand.quickutils
-    #:sand.utils))
+    :cl
+    :losh
+    :iterate
+    :cl-arrows
+    :sand.quickutils
+    :sand.utils))
 
-(defpackage #:sand.terrain.diamond-square
+(defpackage :sand.terrain.diamond-square
   (:use
-    #:cl
-    #:losh
-    #:iterate
-    #:cl-arrows
-    #:sand.quickutils
-    #:sand.utils))
+    :cl
+    :losh
+    :iterate
+    :cl-arrows
+    :sand.quickutils
+    :sand.utils))
 
-(defpackage #:sand.sketch
+(defpackage :sand.sketch
   (:use
-    #:cl
-    #:losh
-    #:sketch
-    #:iterate
-    #:sand.quickutils
-    #:sand.utils)
-  (:shadowing-import-from #:iterate
-    #:in)
-  (:shadowing-import-from #:sketch
-    #:degrees
-    #:radians))
+    :cl
+    :losh
+    :sketch
+    :iterate
+    :sand.quickutils
+    :sand.utils)
+  (:shadowing-import-from :iterate
+    :in)
+  (:shadowing-import-from :sketch
+    :degrees
+    :radians))
 
-(defpackage #:sand.markov
+(defpackage :sand.markov
   (:use
-    #:cl
-    #:cl-arrows
-    #:losh
-    #:iterate
-    #:split-sequence
-    #:sand.quickutils
-    #:sand.utils))
+    :cl
+    :cl-arrows
+    :losh
+    :iterate
+    :split-sequence
+    :sand.quickutils
+    :sand.utils))
 
-(defpackage #:sand.dijkstra-maps
+(defpackage :sand.dijkstra-maps
   (:use
-    #:cl
-    #:cl-arrows
-    #:losh
-    #:iterate
-    #:sand.quickutils
-    #:sand.utils)
+    :cl
+    :cl-arrows
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils)
   (:export
-    #:dijkstra-map
-    #:make-dijkstra-map
-    #:dm-maximum-value
-    #:dm-map
-    #:dm-ref))
+    :dijkstra-map
+    :make-dijkstra-map
+    :dm-maximum-value
+    :dm-map
+    :dm-ref))
 
-(defpackage #:sand.graphs
+(defpackage :sand.graphs
   (:use
-    #:cl
-    #:cl-arrows
-    #:losh
-    #:iterate
-    #:sand.quickutils
-    #:sand.utils)
-  (:export
-    ))
-
-(defpackage #:sand.graphviz
-  (:use
-    #:cl
-    #:cl-arrows
-    #:losh
-    #:iterate
-    #:sand.quickutils
-    #:sand.utils)
-  (:export
-    #:graphviz-digraph))
-
-(defpackage #:sand.binary-decision-diagrams
-  (:use
-    #:cl
-    #:cl-arrows
-    #:losh
-    #:iterate
-    #:sand.graphviz
-    #:sand.quickutils
-    #:sand.utils)
+    :cl
+    :cl-arrows
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils)
   (:export
     ))
 
-(defpackage #:sand.zero-suppressed-decision-diagrams
+(defpackage :sand.graphviz
   (:use
-    #:cl
-    #:cl-arrows
-    #:losh
-    #:iterate
-    #:sand.graphviz
-    #:sand.quickutils
-    #:sand.utils)
+    :cl
+    :cl-arrows
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils)
+  (:export
+    :graphviz-digraph))
+
+(defpackage :sand.binary-decision-diagrams
+  (:use
+    :cl
+    :cl-arrows
+    :losh
+    :iterate
+    :sand.graphviz
+    :sand.quickutils
+    :sand.utils)
+  (:export
+    ))
+
+(defpackage :sand.zero-suppressed-decision-diagrams
+  (:use
+    :cl
+    :cl-arrows
+    :losh
+    :iterate
+    :sand.graphviz
+    :sand.quickutils
+    :sand.utils)
   (:export
     )
-  (:nicknames #:sand.zdd))
+  (:nicknames :sand.zdd))
 
-(defpackage #:sand.huffman-trees
+(defpackage :sand.huffman-trees
   (:use
-    #:cl
-    #:cl-arrows
-    #:losh
-    #:iterate
-    #:sand.graphviz
-    #:sand.quickutils
-    #:sand.utils)
+    :cl
+    :cl-arrows
+    :losh
+    :iterate
+    :sand.graphviz
+    :sand.quickutils
+    :sand.utils)
   (:export
     ))
 
-(defpackage #:sand.rubiks
+(defpackage :sand.streams
   (:use
-    #:cl
-    #:cl-arrows
-    #:losh
-    #:iterate
-    #:sand.quickutils
-    #:sand.utils)
-  (:export
-    ))
-
-(defpackage #:sand.streams
-  (:use
-    #:cl
-    #:cl-arrows
-    #:losh
-    #:iterate
-    #:sand.primes
-    #:sand.quickutils
-    #:sand.utils)
+    :cl
+    :cl-arrows
+    :losh
+    :iterate
+    :sand.primes
+    :sand.quickutils
+    :sand.utils)
   (:export
     ))
 
 #+sbcl
-(defpackage #:sand.ffi
+(defpackage :sand.ffi
   (:use
-    #:cl
-    #:cl-arrows
-    #:losh
-    #:iterate
-    #:cffi
-    #:sand.quickutils
-    #:sand.utils)
+    :cl
+    :cl-arrows
+    :losh
+    :iterate
+    :cffi
+    :sand.quickutils
+    :sand.utils)
   (:export
     ))
 
-(defpackage #:sand.color-difference
+(defpackage :sand.color-difference
   (:use
-    #:cl
-    #:cl-arrows
-    #:losh
-    #:iterate
-    #:rs-colors
-    #:sand.quickutils
-    #:sand.utils)
+    :cl
+    :cl-arrows
+    :losh
+    :iterate
+    :rs-colors
+    :sand.quickutils
+    :sand.utils)
   (:export
     ))
 
 
 #+sbcl
-(defpackage #:sand.profiling
+(defpackage :sand.profiling
   (:use
-    #:cl
-    #:cl-arrows
-    #:losh
-    #:iterate
-    #:sand.quickutils
-    #:sand.utils)
+    :cl
+    :cl-arrows
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils)
   (:export
-    #:start-profiling
-    #:stop-profiling
-    #:profile))
+    :start-profiling
+    :stop-profiling
+    :profile))
 
 
-(defpackage #:sand.number-letters
+(defpackage :sand.number-letters
   (:use
-    #:cl
-    #:cl-arrows
-    #:losh
-    #:iterate
-    #:function-cache
-    #:sand.quickutils
-    #:sand.utils)
+    :cl
+    :cl-arrows
+    :losh
+    :iterate
+    :function-cache
+    :sand.quickutils
+    :sand.utils)
   (:export
     ))
+
+(defpackage :sand.urn
+  (:use
+    :cl
+    :cl-arrows
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils)
+  (:export
+    ))
+
 
