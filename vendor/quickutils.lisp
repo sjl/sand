@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :CURRY :DEFINE-CONSTANT :ENSURE-GETHASH :HASH-TABLE-ALIST :HASH-TABLE-PLIST :HASH-TABLE-KEYS :HASH-TABLE-VALUES :N-GRAMS :ONCE-ONLY :RCURRY :READ-FILE-INTO-STRING :REQUIRED-ARGUMENT :RIFFLE :TREE-COLLECT :WITH-GENSYMS) :ensure-package T :package "SAND.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :CURRY :DEFINE-CONSTANT :ENSURE-GETHASH :HASH-TABLE-ALIST :HASH-TABLE-KEYS :HASH-TABLE-PLIST :HASH-TABLE-VALUES :N-GRAMS :ONCE-ONLY :RCURRY :READ-FILE-INTO-STRING :REQUIRED-ARGUMENT :RIFFLE :SYMB :TREE-COLLECT :WITH-GENSYMS) :ensure-package T :package "SAND.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "SAND.QUICKUTILS")
@@ -16,14 +16,14 @@
   (setf *utilities* (union *utilities* '(:MAKE-GENSYM-LIST :ENSURE-FUNCTION
                                          :COMPOSE :CURRY :DEFINE-CONSTANT
                                          :ENSURE-GETHASH :HASH-TABLE-ALIST
-                                         :HASH-TABLE-PLIST :MAPHASH-KEYS
-                                         :HASH-TABLE-KEYS :MAPHASH-VALUES
+                                         :MAPHASH-KEYS :HASH-TABLE-KEYS
+                                         :HASH-TABLE-PLIST :MAPHASH-VALUES
                                          :HASH-TABLE-VALUES :TAKE :N-GRAMS
                                          :ONCE-ONLY :RCURRY :WITH-OPEN-FILE*
                                          :WITH-INPUT-FROM-FILE
                                          :READ-FILE-INTO-STRING
-                                         :REQUIRED-ARGUMENT :RIFFLE
-                                         :TREE-COLLECT :STRING-DESIGNATOR
+                                         :REQUIRED-ARGUMENT :RIFFLE :MKSTR
+                                         :SYMB :TREE-COLLECT :STRING-DESIGNATOR
                                          :WITH-GENSYMS))))
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun make-gensym-list (length &optional (x "G"))
@@ -155,16 +155,6 @@ already in the table."
       alist))
   
 
-  (defun hash-table-plist (table)
-    "Returns a property list containing the keys and values of hash table
-`table`."
-    (let ((plist nil))
-      (maphash (lambda (k v)
-                 (setf plist (list* k v plist)))
-               table)
-      plist))
-  
-
   (declaim (inline maphash-keys))
   (defun maphash-keys (function table)
     "Like `maphash`, but calls `function` with each key in the hash table `table`."
@@ -181,6 +171,16 @@ already in the table."
                       (push k keys))
                     table)
       keys))
+  
+
+  (defun hash-table-plist (table)
+    "Returns a property list containing the keys and values of hash table
+`table`."
+    (let ((plist nil))
+      (maphash (lambda (k v)
+                 (setf plist (list* k v plist)))
+               table)
+      plist))
   
 
   (declaim (inline maphash-values))
@@ -338,6 +338,23 @@ a default value for required keyword arguments."
             :collect obj))
   
 
+  (defun mkstr (&rest args)
+    "Receives any number of objects (string, symbol, keyword, char, number), extracts all printed representations, and concatenates them all into one string.
+
+Extracted from _On Lisp_, chapter 4."
+    (with-output-to-string (s)
+      (dolist (a args) (princ a s))))
+  
+
+  (defun symb (&rest args)
+    "Receives any number of objects, concatenates all into one string with `#'mkstr` and converts them to symbol.
+
+Extracted from _On Lisp_, chapter 4.
+
+See also: `symbolicate`"
+    (values (intern (apply #'mkstr args))))
+  
+
   (defun tree-collect (predicate tree)
     "Returns a list of every node in the `tree` that satisfies the `predicate`. If there are any improper lists in the tree, the `predicate` is also applied to their dotted elements."
     (let ((sentinel (gensym)))
@@ -402,8 +419,8 @@ unique symbol the named variable will be bound to."
   
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (export '(compose curry define-constant ensure-gethash hash-table-alist
-            hash-table-plist hash-table-keys hash-table-values n-grams
+            hash-table-keys hash-table-plist hash-table-values n-grams
             once-only rcurry read-file-into-string required-argument riffle
-            tree-collect with-gensyms with-unique-names)))
+            symb tree-collect with-gensyms with-unique-names)))
 
 ;;;; END OF quickutils.lisp ;;;;

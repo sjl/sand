@@ -9,8 +9,8 @@
                :define-constant
                :ensure-gethash
                :hash-table-alist
-               :hash-table-plist
                :hash-table-keys
+               :hash-table-plist
                :hash-table-values
                :n-grams
                :once-only
@@ -18,6 +18,7 @@
                :read-file-into-string
                :required-argument
                :riffle
+               :symb
                :tree-collect
                :with-gensyms
 

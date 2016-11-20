@@ -9,9 +9,7 @@
     :cl-arrows
     :sand.quickutils)
   (:export
-    :average4)
-  (:shadowing-import-from :cl-arrows
-    :->))
+    :average4))
 
 (defpackage :sand.primes
   (:use
@@ -31,9 +29,22 @@
     :iterate
     :cl-arrows
     :sand.quickutils
+    :sand.utils))
+
+(defpackage :sand.generic-arithmetic
+  (:use
+    :cl
+    :losh
+    :iterate
+    :cl-arrows
+    :sandalphon.compiler-macro
+    :sand.quickutils
     :sand.utils)
-  (:shadowing-import-from :cl-arrows
-    :->))
+  (:shadow
+    :+
+    :-
+    :/
+    :*))
 
 (defpackage :sand.parenscript
   (:use
@@ -42,9 +53,7 @@
     :sand.quickutils
     :cl-arrows
     :cl-fad
-    :parenscript)
-  (:shadowing-import-from :cl-arrows
-    :->)
+    :parenscript) 
   (:shadowing-import-from :losh
     :%))
 

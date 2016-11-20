@@ -7,26 +7,30 @@
   :license "MIT/X11"
   :version "0.0.1"
 
-  :depends-on (#:cl-charms
-               #:iterate
-               #:cl-arrows
-               #:cl-fad
-               #:split-sequence
-               #:parenscript
-               #:sketch
-               #:losh
-               #:drakma
-               #:function-cache
-               #:yason
-               #:flexi-streams
-               #:sanitize
-               #:html-entities
-               #:plump
-               #:clss
-               #:cl-algebraic-data-type
-               #:rs-colors
-               #:cffi
-               #+sbcl #:sb-sprof
+  :depends-on (
+
+               #+sbcl :sb-sprof
+               :cffi
+               :cl-algebraic-data-type
+               :cl-arrows
+               :cl-charms
+               :cl-fad
+               :clss
+               :compiler-macro
+               :drakma
+               :flexi-streams
+               :function-cache
+               :html-entities
+               :iterate
+               :losh
+               :parenscript
+               :plump
+               :rs-colors
+               :sanitize
+               :sketch
+               :split-sequence
+               :yason
+
                )
 
   :serial t
@@ -43,6 +47,7 @@
                  (:file "graphviz")
                  (:file "urn")
                  (:file "random-numbers")
+                 (:file "generic-arithmetic")
                  (:file "ascii")
                  (:file "markov")
                  (:file "dijkstra-maps")
