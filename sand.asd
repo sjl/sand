@@ -48,6 +48,7 @@
                  (:file "urn")
                  (:file "random-numbers")
                  (:file "generic-arithmetic")
+                 (:file "sorting")
                  (:file "ascii")
                  (:file "markov")
                  (:file "dijkstra-maps")

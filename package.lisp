@@ -46,6 +46,15 @@
     :/
     :*))
 
+(defpackage :sand.sorting
+  (:use
+    :cl
+    :losh
+    :iterate
+    :cl-arrows
+    :sand.quickutils
+    :sand.utils))
+
 (defpackage :sand.parenscript
   (:use
     :cl
