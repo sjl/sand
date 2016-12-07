@@ -145,6 +145,27 @@
   (:export
     :graphviz-digraph))
 
+(defpackage :sand.ropes
+  (:use
+    :cl
+    :cl-arrows
+    :losh
+    :iterate
+    :trivia
+    :sand.quickutils
+    :sand.utils)
+  (:export
+    ))
+
+(defpackage :sand.hanoi
+  (:use
+    :cl
+    :losh
+    :sand.quickutils
+    :sand.utils)
+  (:export
+    ))
+
 (defpackage :sand.binary-decision-diagrams
   (:use
     :cl

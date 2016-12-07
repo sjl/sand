@@ -23,6 +23,7 @@
                :html-entities
                :iterate
                :losh
+               :trivia
                :parenscript
                :plump
                :rs-colors
@@ -45,9 +46,11 @@
                  (:file "primes")
                  (:file "graphs")
                  (:file "graphviz")
+                 (:file "hanoi")
                  (:file "urn")
                  (:file "random-numbers")
                  (:file "generic-arithmetic")
+                 (:file "ropes")
                  (:file "sorting")
                  (:file "ascii")
                  (:file "markov")

@@ -8,6 +8,7 @@
                :curry
                :define-constant
                :ensure-gethash
+               :ensure-list
                :hash-table-alist
                :hash-table-keys
                :hash-table-plist
@@ -18,6 +19,7 @@
                :read-file-into-string
                :required-argument
                :riffle
+               :subdivide
                :symb
                :tree-collect
                :with-gensyms

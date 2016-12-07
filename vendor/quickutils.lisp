@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :CURRY :DEFINE-CONSTANT :ENSURE-GETHASH :HASH-TABLE-ALIST :HASH-TABLE-KEYS :HASH-TABLE-PLIST :HASH-TABLE-VALUES :N-GRAMS :ONCE-ONLY :RCURRY :READ-FILE-INTO-STRING :REQUIRED-ARGUMENT :RIFFLE :SYMB :TREE-COLLECT :WITH-GENSYMS) :ensure-package T :package "SAND.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :CURRY :DEFINE-CONSTANT :ENSURE-GETHASH :ENSURE-LIST :HASH-TABLE-ALIST :HASH-TABLE-KEYS :HASH-TABLE-PLIST :HASH-TABLE-VALUES :N-GRAMS :ONCE-ONLY :RCURRY :READ-FILE-INTO-STRING :REQUIRED-ARGUMENT :RIFFLE :SUBDIVIDE :SYMB :TREE-COLLECT :WITH-GENSYMS) :ensure-package T :package "SAND.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "SAND.QUICKUTILS")
@@ -15,16 +15,16 @@
 (when (boundp '*utilities*)
   (setf *utilities* (union *utilities* '(:MAKE-GENSYM-LIST :ENSURE-FUNCTION
                                          :COMPOSE :CURRY :DEFINE-CONSTANT
-                                         :ENSURE-GETHASH :HASH-TABLE-ALIST
-                                         :MAPHASH-KEYS :HASH-TABLE-KEYS
-                                         :HASH-TABLE-PLIST :MAPHASH-VALUES
-                                         :HASH-TABLE-VALUES :TAKE :N-GRAMS
-                                         :ONCE-ONLY :RCURRY :WITH-OPEN-FILE*
-                                         :WITH-INPUT-FROM-FILE
+                                         :ENSURE-GETHASH :ENSURE-LIST
+                                         :HASH-TABLE-ALIST :MAPHASH-KEYS
+                                         :HASH-TABLE-KEYS :HASH-TABLE-PLIST
+                                         :MAPHASH-VALUES :HASH-TABLE-VALUES
+                                         :TAKE :N-GRAMS :ONCE-ONLY :RCURRY
+                                         :WITH-OPEN-FILE* :WITH-INPUT-FROM-FILE
                                          :READ-FILE-INTO-STRING
-                                         :REQUIRED-ARGUMENT :RIFFLE :MKSTR
-                                         :SYMB :TREE-COLLECT :STRING-DESIGNATOR
-                                         :WITH-GENSYMS))))
+                                         :REQUIRED-ARGUMENT :RIFFLE :SUBDIVIDE
+                                         :MKSTR :SYMB :TREE-COLLECT
+                                         :STRING-DESIGNATOR :WITH-GENSYMS))))
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun make-gensym-list (length &optional (x "G"))
     "Returns a list of `length` gensyms, each generated as if with a call to `make-gensym`,
@@ -143,6 +143,13 @@ already in the table."
        (if ok
            (values value ok)
            (values (setf (gethash ,key ,hash-table) ,default) nil))))
+  
+
+  (defun ensure-list (list)
+    "If `list` is a list, it is returned. Otherwise returns the list designated by `list`."
+    (if (listp list)
+        list
+        (list list)))
   
 
   (defun hash-table-alist (table)
@@ -338,6 +345,28 @@ a default value for required keyword arguments."
             :collect obj))
   
 
+  (defun subdivide (sequence chunk-size)
+    "Split `sequence` into subsequences of size `chunk-size`."
+    (check-type sequence sequence)
+    (check-type chunk-size (integer 1))
+    
+    (etypecase sequence
+      ;; Since lists have O(N) access time, we iterate through manually,
+      ;; collecting each chunk as we pass through it. Using SUBSEQ would
+      ;; be O(N^2).
+      (list (loop :while sequence
+                  :collect
+                  (loop :repeat chunk-size
+                        :while sequence
+                        :collect (pop sequence))))
+      
+      ;; For other sequences like strings or arrays, we can simply chunk
+      ;; by repeated SUBSEQs.
+      (sequence (loop :with len := (length sequence)
+                      :for i :below len :by chunk-size
+                      :collect (subseq sequence i (min len (+ chunk-size i)))))))
+  
+
   (defun mkstr (&rest args)
     "Receives any number of objects (string, symbol, keyword, char, number), extracts all printed representations, and concatenates them all into one string.
 
@@ -418,9 +447,9 @@ unique symbol the named variable will be bound to."
     `(with-gensyms ,names ,@forms))
   
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (export '(compose curry define-constant ensure-gethash hash-table-alist
-            hash-table-keys hash-table-plist hash-table-values n-grams
-            once-only rcurry read-file-into-string required-argument riffle
-            symb tree-collect with-gensyms with-unique-names)))
+  (export '(compose curry define-constant ensure-gethash ensure-list
+            hash-table-alist hash-table-keys hash-table-plist hash-table-values
+            n-grams once-only rcurry read-file-into-string required-argument
+            riffle subdivide symb tree-collect with-gensyms with-unique-names)))
 
 ;;;; END OF quickutils.lisp ;;;;
