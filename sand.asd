@@ -1,4 +1,4 @@
-(asdf:defsystem #:sand
+(asdf:defsystem :sand
   :name "sand"
   :description "A little sandbox to play around in."
 

@@ -1,4 +1,4 @@
-(in-package #:sand.terrain.diamond-square)
+(in-package :sand.terrain.diamond-square)
 
 
 

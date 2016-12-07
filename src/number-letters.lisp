@@ -1,4 +1,4 @@
-(in-package #:sand.number-letters)
+(in-package :sand.number-letters)
 
 ; https://www.youtube.com/watch?v=LYKn0yUTIU4
 

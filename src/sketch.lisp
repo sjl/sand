@@ -1,4 +1,4 @@
-(in-package #:sand.sketch)
+(in-package :sand.sketch)
 
 ;;;; Config
 ; (setf *bypass-cache* t)

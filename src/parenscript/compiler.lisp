@@ -1,4 +1,4 @@
-(in-package #:sand.parenscript)
+(in-package :sand.parenscript)
 
 (defun compile-parenscript-file (source)
   (let* ((source-path (pathname source))

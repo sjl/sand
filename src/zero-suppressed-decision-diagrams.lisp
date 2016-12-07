@@ -1,4 +1,4 @@
-(in-package #:sand.zero-suppressed-decision-diagrams)
+(in-package :sand.zero-suppressed-decision-diagrams)
 
 (adt:defdata zdd
   empty

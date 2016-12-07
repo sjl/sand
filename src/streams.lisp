@@ -1,4 +1,4 @@
-(in-package #:sand.streams)
+(in-package :sand.streams)
 
 
 ;;;; Streams from SICP

@@ -1,4 +1,4 @@
-(in-package #:sand.binary-decision-diagrams)
+(in-package :sand.binary-decision-diagrams)
 
 (deftype non-negative-fixnum ()
   `(integer 0 ,most-positive-fixnum))

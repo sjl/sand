@@ -1,4 +1,4 @@
-(in-package #:cl-user)
+(in-package :cl-user)
 
 (defun say-hello (name)
   (alert (+ "Hello, " name "!")))

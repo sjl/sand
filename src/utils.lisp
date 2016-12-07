@@ -1,4 +1,4 @@
-(in-package #:sand.utils)
+(in-package :sand.utils)
 
 
 (defun average4 (a b c d)

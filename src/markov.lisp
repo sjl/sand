@@ -1,4 +1,4 @@
-(in-package #:sand.markov)
+(in-package :sand.markov)
 
 ; (defparameter *text*
 ;   (read-file-into-string "data/lightships-and-lighthouses.txt"))

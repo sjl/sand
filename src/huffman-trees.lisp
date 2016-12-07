@@ -1,4 +1,4 @@
-(in-package #:sand.huffman-trees)
+(in-package :sand.huffman-trees)
 
 ;;;; Data ---------------------------------------------------------------------
 ;;; Interface:

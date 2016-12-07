@@ -1,4 +1,4 @@
-(in-package #:sand.profiling)
+(in-package :sand.profiling)
 
 #+sbcl
 (defun dump-profile ()

@@ -1,4 +1,4 @@
-(in-package #:sand.ascii)
+(in-package :sand.ascii)
 
 
 (defparameter *running* nil)

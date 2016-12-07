@@ -1,4 +1,4 @@
-(in-package #:sand.random-numbers)
+(in-package :sand.random-numbers)
 
 
 ;;;; Types, etc

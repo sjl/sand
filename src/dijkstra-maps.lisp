@@ -1,4 +1,4 @@
-(in-package #:sand.dijkstra-maps)
+(in-package :sand.dijkstra-maps)
 
 
 (defclass dijkstra-map ()

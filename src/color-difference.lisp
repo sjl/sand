@@ -1,4 +1,4 @@
-(in-package #:sand.color-difference)
+(in-package :sand.color-difference)
 
 ; https://en.wikipedia.org/wiki/Color_difference
 

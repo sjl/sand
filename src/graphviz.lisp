@@ -1,4 +1,4 @@
-(in-package #:sand.graphviz)
+(in-package :sand.graphviz)
 
 (defun graphviz-node (id &key (label id) (shape :box))
   (format t "    ~A [shape=~(~A~),label=\"~A\"];~%"

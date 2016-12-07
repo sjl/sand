@@ -1,4 +1,4 @@
-(in-package #:sand.graphs)
+(in-package :sand.graphs)
 
 
 (defun make-edge (from to)
