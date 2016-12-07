@@ -62,11 +62,12 @@
                  (:file "huffman-trees")
                  (:file "streams")
                  (:file "color-difference")
-                 (:file "number-letters")
+                 #+sbcl (:file "number-letters")
                  (:module "terrain"
                   :serial t
                   :components ((:file "diamond-square")))
                  (:module "parenscript"
                   :serial t
                   :components ((:file "compiler")))
-                 (:file "sketch")))))
+                 (:file "sketch")
+                 (:file "wallpaper")))))

@@ -98,6 +98,20 @@
     :degrees
     :radians))
 
+(defpackage :sand.wallpaper
+  (:use
+    :cl
+    :losh
+    :sketch
+    :iterate
+    :sand.quickutils
+    :sand.utils)
+  (:shadowing-import-from :iterate
+    :in)
+  (:shadowing-import-from :sketch
+    :degrees
+    :radians))
+
 (defpackage :sand.markov
   (:use
     :cl
