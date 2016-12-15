@@ -28,6 +28,9 @@
 ;;; known to be `number`s at compile time it will compile in the vanilla CL op
 ;;; instead:
 ;;;
+;;;
+;;; No declaration, calls the generic function in this package:
+;;;
 ;;;     (defun foo (x)
 ;;;       (+ 5 x))
 ;;;     (disassemble 'foo)
@@ -44,6 +47,8 @@
 ;;;     ; 618:       FF6009           JMP QWORD PTR [RAX+9]
 ;;;     ; 61B:       0F0B10           BREAK 16               ; Invalid argument count trap
 ;;;
+;;;
+;;; Number, calls the Lisp +:
 ;;;
 ;;;     (defun foo-number (x)
 ;;;       (declare (type number x))
@@ -65,6 +70,8 @@
 ;;;     ; 6E:       C3               RET
 ;;;     ; 6F:       0F0B10           BREAK 16                ; Invalid argument count trap
 ;;;
+;;;
+;;; Small number, SBCL just compiles down to fixnum addition:
 ;;;
 ;;;     (defun foo-byte (x)
 ;;;       (declare (type (unsigned-byte 8) x))
@@ -120,6 +127,7 @@
 (define-generic-operation - cl:- nil)
 (define-generic-operation * cl:* t)
 (define-generic-operation / cl:/ nil)
+
 
 ;;;; Example: Vectors
 ;;; Addition
