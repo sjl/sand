@@ -13,8 +13,10 @@
                :hash-table-keys
                :hash-table-plist
                :hash-table-values
+               :iota
                :n-grams
                :once-only
+               :range
                :rcurry
                :read-file-into-string
                :required-argument

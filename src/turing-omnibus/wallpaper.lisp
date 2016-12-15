@@ -1,4 +1,4 @@
-(in-package :sand.wallpaper)
+(in-package :sand.turing-omnibus.wallpaper)
 
 ;;;; From The New Turing Omnibus, Chapter 1
 

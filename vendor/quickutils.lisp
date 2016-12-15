@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :CURRY :DEFINE-CONSTANT :ENSURE-GETHASH :ENSURE-LIST :HASH-TABLE-ALIST :HASH-TABLE-KEYS :HASH-TABLE-PLIST :HASH-TABLE-VALUES :N-GRAMS :ONCE-ONLY :RCURRY :READ-FILE-INTO-STRING :REQUIRED-ARGUMENT :RIFFLE :SUBDIVIDE :SYMB :TREE-COLLECT :WITH-GENSYMS) :ensure-package T :package "SAND.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :CURRY :DEFINE-CONSTANT :ENSURE-GETHASH :ENSURE-LIST :HASH-TABLE-ALIST :HASH-TABLE-KEYS :HASH-TABLE-PLIST :HASH-TABLE-VALUES :IOTA :N-GRAMS :ONCE-ONLY :RANGE :RCURRY :READ-FILE-INTO-STRING :REQUIRED-ARGUMENT :RIFFLE :SUBDIVIDE :SYMB :TREE-COLLECT :WITH-GENSYMS) :ensure-package T :package "SAND.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "SAND.QUICKUTILS")
@@ -19,8 +19,9 @@
                                          :HASH-TABLE-ALIST :MAPHASH-KEYS
                                          :HASH-TABLE-KEYS :HASH-TABLE-PLIST
                                          :MAPHASH-VALUES :HASH-TABLE-VALUES
-                                         :TAKE :N-GRAMS :ONCE-ONLY :RCURRY
-                                         :WITH-OPEN-FILE* :WITH-INPUT-FROM-FILE
+                                         :IOTA :TAKE :N-GRAMS :ONCE-ONLY :RANGE
+                                         :RCURRY :WITH-OPEN-FILE*
+                                         :WITH-INPUT-FROM-FILE
                                          :READ-FILE-INTO-STRING
                                          :REQUIRED-ARGUMENT :RIFFLE :SUBDIVIDE
                                          :MKSTR :SYMB :TREE-COLLECT
@@ -208,6 +209,24 @@ already in the table."
       values))
   
 
+  (declaim (inline iota))
+  (defun iota (n &key (start 0) (step 1))
+    "Return a list of `n` numbers, starting from `start` (with numeric contagion
+from `step` applied), each consequtive number being the sum of the previous one
+and `step`. `start` defaults to `0` and `step` to `1`.
+
+Examples:
+
+    (iota 4)                      => (0 1 2 3)
+    (iota 3 :start 1 :step 1.0)   => (1.0 2.0 3.0)
+    (iota 3 :start -1 :step -1/2) => (-1 -3/2 -2)"
+    (declare (type (integer 0) n) (number start step))
+    (loop repeat n
+          ;; KLUDGE: get numeric contagion right for the first element too
+          for i = (+ (- (+ start step) step)) then (+ i step)
+          collect i))
+  
+
   (defun take (n sequence)
     "Take the first `n` elements from `sequence`."
     (subseq sequence 0 n))
@@ -266,6 +285,14 @@ Example:
             ,(let ,(mapcar (lambda (n g) (list (car n) g))
                     names-and-forms gensyms)
                ,@forms)))))
+  
+
+  (defun range (start end &key (step 1) (key 'identity))
+    "Return the list of numbers `n` such that `start <= n < end` and
+`n = start + k*step` for suitable integers `k`. If a function `key` is
+provided, then apply it to each number."
+    (assert (<= start end))
+    (loop :for i :from start :below end :by step :collecting (funcall key i)))
   
 
   (defun rcurry (function &rest arguments)
@@ -449,7 +476,8 @@ unique symbol the named variable will be bound to."
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (export '(compose curry define-constant ensure-gethash ensure-list
             hash-table-alist hash-table-keys hash-table-plist hash-table-values
-            n-grams once-only rcurry read-file-into-string required-argument
-            riffle subdivide symb tree-collect with-gensyms with-unique-names)))
+            iota n-grams once-only range rcurry read-file-into-string
+            required-argument riffle subdivide symb tree-collect with-gensyms
+            with-unique-names)))
 
 ;;;; END OF quickutils.lisp ;;;;

@@ -23,13 +23,13 @@
                :html-entities
                :iterate
                :losh
-               :trivia
                :parenscript
                :plump
                :rs-colors
                :sanitize
                :sketch
                :split-sequence
+               :trivia
                :yason
 
                )
@@ -70,4 +70,7 @@
                   :serial t
                   :components ((:file "compiler")))
                  (:file "sketch")
-                 (:file "wallpaper")))))
+                 (:module "turing-omnibus"
+                  :serial t
+                  :components ((:file "wallpaper")
+                               (:file "monte-carlo")))))))

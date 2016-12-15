@@ -98,20 +98,6 @@
     :degrees
     :radians))
 
-(defpackage :sand.wallpaper
-  (:use
-    :cl
-    :losh
-    :sketch
-    :iterate
-    :sand.quickutils
-    :sand.utils)
-  (:shadowing-import-from :iterate
-    :in)
-  (:shadowing-import-from :sketch
-    :degrees
-    :radians))
-
 (defpackage :sand.markov
   (:use
     :cl
@@ -294,3 +280,24 @@
     ))
 
 
+(defpackage :sand.turing-omnibus.wallpaper
+  (:use
+    :cl
+    :losh
+    :sketch
+    :iterate
+    :sand.quickutils
+    :sand.utils)
+  (:shadowing-import-from :iterate
+    :in)
+  (:shadowing-import-from :sketch
+    :degrees
+    :radians))
+
+(defpackage :sand.turing-omnibus.monto-carlo
+  (:use
+    :cl
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils))
