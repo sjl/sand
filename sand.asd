@@ -73,4 +73,5 @@
                  (:module "turing-omnibus"
                   :serial t
                   :components ((:file "wallpaper")
-                               (:file "monte-carlo")))))))
+                               (:file "monte-carlo")
+                               (:file "minimax")))))))

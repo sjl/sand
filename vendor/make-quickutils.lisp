@@ -5,10 +5,12 @@
   :utilities '(
 
                :compose
+               :copy-array
                :curry
                :define-constant
                :ensure-gethash
                :ensure-list
+               :extremum
                :hash-table-alist
                :hash-table-keys
                :hash-table-plist

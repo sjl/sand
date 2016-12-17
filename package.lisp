@@ -301,3 +301,12 @@
     :iterate
     :sand.quickutils
     :sand.utils))
+
+(defpackage :sand.turing-omnibus.minimax
+  (:use
+    :cl
+    :losh
+    :iterate
+    :cl-arrows
+    :sand.quickutils
+    :sand.utils))

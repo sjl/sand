@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :CURRY :DEFINE-CONSTANT :ENSURE-GETHASH :ENSURE-LIST :HASH-TABLE-ALIST :HASH-TABLE-KEYS :HASH-TABLE-PLIST :HASH-TABLE-VALUES :IOTA :N-GRAMS :ONCE-ONLY :RANGE :RCURRY :READ-FILE-INTO-STRING :REQUIRED-ARGUMENT :RIFFLE :SUBDIVIDE :SYMB :TREE-COLLECT :WITH-GENSYMS) :ensure-package T :package "SAND.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :COPY-ARRAY :CURRY :DEFINE-CONSTANT :ENSURE-GETHASH :ENSURE-LIST :EXTREMUM :HASH-TABLE-ALIST :HASH-TABLE-KEYS :HASH-TABLE-PLIST :HASH-TABLE-VALUES :IOTA :N-GRAMS :ONCE-ONLY :RANGE :RCURRY :READ-FILE-INTO-STRING :REQUIRED-ARGUMENT :RIFFLE :SUBDIVIDE :SYMB :TREE-COLLECT :WITH-GENSYMS) :ensure-package T :package "SAND.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "SAND.QUICKUTILS")
@@ -14,8 +14,9 @@
 
 (when (boundp '*utilities*)
   (setf *utilities* (union *utilities* '(:MAKE-GENSYM-LIST :ENSURE-FUNCTION
-                                         :COMPOSE :CURRY :DEFINE-CONSTANT
-                                         :ENSURE-GETHASH :ENSURE-LIST
+                                         :COMPOSE :COPY-ARRAY :CURRY
+                                         :DEFINE-CONSTANT :ENSURE-GETHASH
+                                         :ENSURE-LIST :EXTREMUM
                                          :HASH-TABLE-ALIST :MAPHASH-KEYS
                                          :HASH-TABLE-KEYS :HASH-TABLE-PLIST
                                          :MAPHASH-VALUES :HASH-TABLE-VALUES
@@ -77,6 +78,24 @@ and then calling the next one with the primary value of the last."
            (lambda (&rest arguments)
              (declare (dynamic-extent arguments))
              ,(compose-1 funs))))))
+  
+
+  (defun copy-array (array &key (element-type (array-element-type array))
+                                (fill-pointer (and (array-has-fill-pointer-p array)
+                                                   (fill-pointer array)))
+                                (adjustable (adjustable-array-p array)))
+    "Returns an undisplaced copy of `array`, with same `fill-pointer` and
+adjustability (if any) as the original, unless overridden by the keyword
+arguments."
+    (let* ((dimensions (array-dimensions array))
+           (new-array (make-array dimensions
+                                  :element-type element-type
+                                  :adjustable adjustable
+                                  :fill-pointer fill-pointer)))
+      (dotimes (i (array-total-size array))
+        (setf (row-major-aref new-array i)
+              (row-major-aref array i)))
+      new-array))
   
 
   (defun curry (function &rest arguments)
@@ -151,6 +170,50 @@ already in the table."
     (if (listp list)
         list
         (list list)))
+  
+
+  (defun extremum (sequence predicate &key key (start 0) end)
+    "Returns the element of `sequence` that would appear first if the subsequence
+bounded by `start` and `end` was sorted using `predicate` and `key`.
+
+`extremum` determines the relationship between two elements of `sequence` by using
+the `predicate` function. `predicate` should return true if and only if the first
+argument is strictly less than the second one (in some appropriate sense). Two
+arguments `x` and `y` are considered to be equal if `(funcall predicate x y)`
+and `(funcall predicate y x)` are both false.
+
+The arguments to the `predicate` function are computed from elements of `sequence`
+using the `key` function, if supplied. If `key` is not supplied or is `nil`, the
+sequence element itself is used.
+
+If `sequence` is empty, `nil` is returned."
+    (let* ((pred-fun (ensure-function predicate))
+           (key-fun (unless (or (not key) (eq key 'identity) (eq key #'identity))
+                      (ensure-function key)))
+           (real-end (or end (length sequence))))
+      (cond ((> real-end start)
+             (if key-fun
+                 (flet ((reduce-keys (a b)
+                          (if (funcall pred-fun
+                                       (funcall key-fun a)
+                                       (funcall key-fun b))
+                              a
+                              b)))
+                   (declare (dynamic-extent #'reduce-keys))
+                   (reduce #'reduce-keys sequence :start start :end real-end))
+                 (flet ((reduce-elts (a b)
+                          (if (funcall pred-fun a b)
+                              a
+                              b)))
+                   (declare (dynamic-extent #'reduce-elts))
+                   (reduce #'reduce-elts sequence :start start :end real-end))))
+            ((= real-end start)
+             nil)
+            (t
+             (error "Invalid bounding indexes for sequence of length ~S: ~S ~S, ~S ~S"
+                    (length sequence)
+                    :start start
+                    :end end)))))
   
 
   (defun hash-table-alist (table)
@@ -474,10 +537,10 @@ unique symbol the named variable will be bound to."
     `(with-gensyms ,names ,@forms))
   
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (export '(compose curry define-constant ensure-gethash ensure-list
-            hash-table-alist hash-table-keys hash-table-plist hash-table-values
-            iota n-grams once-only range rcurry read-file-into-string
-            required-argument riffle subdivide symb tree-collect with-gensyms
-            with-unique-names)))
+  (export '(compose copy-array curry define-constant ensure-gethash ensure-list
+            extremum hash-table-alist hash-table-keys hash-table-plist
+            hash-table-values iota n-grams once-only range rcurry
+            read-file-into-string required-argument riffle subdivide symb
+            tree-collect with-gensyms with-unique-names)))
 
 ;;;; END OF quickutils.lisp ;;;;
