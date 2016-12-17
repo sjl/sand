@@ -96,12 +96,13 @@
 
 ;;;; Nim -----------------------------------------------------------------------
 (defstruct (nim-state (:conc-name ns-))
-  piles control)
+  (piles (error "Required") :type (simple-array fixnum (*)))
+  control)
 
 (define-with-macro (nim-state :conc-name ns)
   piles control)
 
-(defun nim-other-role (role)
+(defun-inline nim-other-role (role)
   (ecase role
     (x 'o)
     (o 'x)))
@@ -109,7 +110,7 @@
 
 (defmethod initial-state ((game (eql 'nim)))
   (make-nim-state
-    :piles #(4 3 2 2)
+    :piles (copy-array #(5 3 2 4) :element-type 'fixnum)
     :control 'x))
 
 (defmethod evaluate-state ((game (eql 'nim)) state role)
@@ -122,9 +123,9 @@
 
 
 (defun take-from-pile (piles index amount)
-  (let ((piles (copy-array piles)))
-    ; (declare (type (simple-array fixnum (*)) piles)
-    ;          (type fixnum index amount))
+  (declare (type (simple-array fixnum (*)) piles)
+           (type fixnum index amount))
+  (let ((piles (copy-seq piles)))
     (decf (aref piles index) amount)
     piles))
 
@@ -137,6 +138,20 @@
       (appending (iterate
                    (for take :from 1 :to pile)
                    (collect (make-nim-state :piles (take-from-pile piles i take)
+                                            :control other-role)))))))
+
+; faster
+(defmethod successor-states ((game (eql 'nim)) state)
+  (declare (type nim-state state))
+  (with-nim-state (state)
+    (iterate
+      (declare (iterate:declare-variables))
+      (with other-role = (nim-other-role control))
+      (for (the fixnum p) :from 0 :below (length piles))
+      (appending (iterate
+                   (declare (iterate:declare-variables))
+                   (for (the fixnum take) :from 1 :to (aref piles p))
+                   (collect (make-nim-state :piles (take-from-pile piles p take)
                                             :control other-role)))))))
 
 (defmethod control ((game (eql 'nim)) state)
