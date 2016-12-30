@@ -30,6 +30,7 @@
                :sketch
                :split-sequence
                :trivia
+               :vex
                :yason
 
                )
@@ -70,6 +71,7 @@
                   :serial t
                   :components ((:file "compiler")))
                  (:file "sketch")
+                 (:file "mandelbrot")
                  (:module "turing-omnibus"
                   :serial t
                   :components ((:file "wallpaper")

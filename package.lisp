@@ -240,6 +240,20 @@
   (:export
     ))
 
+(defpackage :sand.mandelbrot
+  (:use
+    :cl
+    :losh
+    :sketch
+    :iterate
+    :sand.quickutils
+    :sand.utils)
+  (:shadowing-import-from :iterate
+    :in)
+  (:shadowing-import-from :sketch
+    :degrees
+    :radians))
+
 
 #+sbcl
 (defpackage :sand.profiling
