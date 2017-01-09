@@ -49,6 +49,17 @@
 
 
 ;;;; Guts ---------------------------------------------------------------------
+(defun string-pre (contents)
+  (separate contents))
+
+(defun string-post (contents)
+  (apply #'cat contents))
+
+
+(defparameter *combination-pre* #'identity)
+(defparameter *combination-post* #'identity)
+
+
 (defun separate (list)
   (-<> list
     (split-sequence:split-sequence :. <>)
@@ -57,9 +68,9 @@
 
 (defun evaluate-vector (vector)
   (-<> (coerce vector 'list)
-    (separate <>)
+    (funcall *combination-pre* <>)
     (mapcar #'evaluate-expression <>)
-    (apply #'cat <>)))
+    (funcall *combination-post* <>)))
 
 (defun evaluate-list (list)
   (destructuring-bind (expr &rest modifiers) list
@@ -67,15 +78,25 @@
             :initial-value (evaluate-expression expr))))
 
 (defun evaluate-expression (expr)
-  (etypecase expr
+  (typecase expr
     (string expr)
+    (keyword expr)
+    (null expr)
     (vector (evaluate-vector expr))
-    (list (evaluate-list expr))
-    (symbol (funcall expr))))
+    (list (if (eq (first expr) 'quote)
+            (second expr)
+            (evaluate-list expr)))
+    (symbol (funcall expr))
+    (t expr)))
 
 
-(defun generate (symbol)
-  (evaluate-expression symbol))
+(defun generate (expression)
+  (evaluate-expression expression))
+
+(defun generate-string (expression)
+  (let ((*combination-pre* #'string-pre)
+        (*combination-post* #'string-post))
+    (evaluate-expression expression)))
 
 
 (defmacro define-symbol (name &rest expressions)
@@ -184,4 +205,66 @@
   #("The" (animal s) "were" activity "in the" nature-noun :. "."))
 
 
-(generate 'sentence)
+; (generate 'sentence)
+
+(define-symbol monster
+  :bat
+  :kobold
+  :goblin)
+
+(define-symbol size
+  5 6 7 8 9 10)
+
+(define-symbol money
+  #((100 random) :gold)
+  #((500 random) :silver))
+
+(define-symbol potion-type
+  "healing"
+  "levitation"
+  "detect magic"
+  "confusion")
+
+(define-symbol potion-quality
+  "strong"
+  "weak"
+  "small")
+
+(define-symbol potion
+  #(potion-quality "potion of" potion-type)
+  #("potion of" potion-type))
+
+(define-symbol enchant
+  "+1"
+  "+2"
+  "+3")
+
+(define-symbol armor-piece
+  "shield"
+  "breastplate"
+  "suit of chain mail"
+  "belt"
+  "helmet")
+
+(define-symbol armor
+  armor-piece
+  #(enchant armor-piece))
+
+(define-symbol item%
+  armor
+  potion)
+
+(defun item ()
+  (generate-string '(item% a)))
+
+(define-symbol loot
+  money
+  item)
+
+(define-symbol room%
+  #(:size size
+    :loot loot
+    :monster monster))
+
+
+; (iterate (repeat 30) (pr (funcall #'generate 'room%)))
