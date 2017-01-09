@@ -9,16 +9,16 @@
 ;;;
 ;;; symbols funcall their symbol-function: animal -> "mouse"
 ;;;
-;;; vectors evaluate their contents and concatenate them with spaces in between:
-;;;     #("foo" animal "bar") -> "foo mouse bar"
+;;; lists evaluate their contents and concatenate them with spaces in between:
+;;;     ("foo" animal "bar") -> "foo mouse bar"
 ;;;
-;;; the magic keyword :. inside a vector suppresses the space there:
+;;; the magic keyword :. inside a list suppresses the space there:
 ;;;
-;;;     #("foo" "bar" :. "baz") -> "foo barbaz"
+;;;     ("foo" "bar" :. "baz") -> "foo barbaz"
 ;;;
-;;; lists evaluate the head and pipe it through all the functions in the tail:
+;;; vectors evaluate the head and pipe it through all the functions in the tail:
 ;;;
-;;;     (animal capitalize pos) -> "Mouse's"
+;;;     #(animal capitalize pos) -> "Mouse's"
 
 
 ;;;; Utils ---------------------------------------------------------------------
@@ -49,6 +49,12 @@
 
 
 ;;;; Guts ---------------------------------------------------------------------
+(defun separate (list)
+  (-<> list
+    (split-sequence:split-sequence :. <>)
+    (mapcar (rcurry #'riffle " ") <>)
+    (apply #'append <>)))
+
 (defun string-pre (contents)
   (separate contents))
 
@@ -60,33 +66,25 @@
 (defparameter *combination-post* #'identity)
 
 
-(defun separate (list)
+(defun evaluate-combination (list)
   (-<> list
-    (split-sequence:split-sequence :. <>)
-    (mapcar (rcurry #'riffle " ") <>)
-    (apply #'append <>)))
-
-(defun evaluate-vector (vector)
-  (-<> (coerce vector 'list)
     (funcall *combination-pre* <>)
     (mapcar #'evaluate-expression <>)
     (funcall *combination-post* <>)))
 
-(defun evaluate-list (list)
-  (destructuring-bind (expr &rest modifiers) list
-    (reduce (flip #'funcall) modifiers
-            :initial-value (evaluate-expression expr))))
+(defun evaluate-modifiers (vector)
+  (reduce (flip #'funcall) vector
+          :start 1
+          :initial-value (evaluate-expression (aref vector 0))))
 
 (defun evaluate-expression (expr)
   (typecase expr
-    (string expr)
-    (keyword expr)
-    (null expr)
-    (vector (evaluate-vector expr))
+    ((or string keyword null) expr)
+    (symbol (funcall expr))
+    (vector (evaluate-modifiers expr))
     (list (if (eq (first expr) 'quote)
             (second expr)
-            (evaluate-list expr)))
-    (symbol (funcall expr))
+            (evaluate-combination expr)))
     (t expr)))
 
 
@@ -198,14 +196,14 @@
   "carousing")
 
 (define-symbol sentence
-  #("The" color animal "of the" nature-noun "is called" (name cap-all q) :. ".")
-  #("The" animal "was" activity "in the" (nature-noun s) :. ".")
-  #((name cap-all pos) "favorite color is" color :. ".")
-  #((nature-noun cap) "air is fresh.")
-  #("The" (animal s) "were" activity "in the" nature-noun :. "."))
+  ("The" color animal "of the" nature-noun "is called" #(name cap-all q) :. ".")
+  ("The" animal "was" activity "in the" #(nature-noun s) :. ".")
+  (#(name cap-all pos) "favorite color is" color :. ".")
+  (#(nature-noun cap) "air is fresh.")
+  ("The" #(animal s) "were" activity "in the" nature-noun :. "."))
 
 
-; (generate 'sentence)
+; (generate-string 'sentence)
 
 (define-symbol monster
   :bat
@@ -216,8 +214,8 @@
   5 6 7 8 9 10)
 
 (define-symbol money
-  #((100 random) :gold)
-  #((500 random) :silver))
+  (#(100 random) :gold)
+  (#(500 random) :silver))
 
 (define-symbol potion-type
   "healing"
@@ -231,8 +229,8 @@
   "small")
 
 (define-symbol potion
-  #(potion-quality "potion of" potion-type)
-  #("potion of" potion-type))
+  (potion-quality "potion of" potion-type)
+  ("potion of" potion-type))
 
 (define-symbol enchant
   "+1"
@@ -248,23 +246,23 @@
 
 (define-symbol armor
   armor-piece
-  #(enchant armor-piece))
+  (enchant armor-piece))
 
 (define-symbol item%
   armor
   potion)
 
 (defun item ()
-  (generate-string '(item% a)))
+  (generate-string #(item% a)))
 
 (define-symbol loot
   money
   item)
 
 (define-symbol room%
-  #(:size size
-    :loot loot
-    :monster monster))
+  (:size size
+   :loot loot
+   :monster monster))
 
 
 ; (iterate (repeat 30) (pr (funcall #'generate 'room%)))
