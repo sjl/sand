@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :COPY-ARRAY :CURRY :DEFINE-CONSTANT :ENSURE-GETHASH :ENSURE-LIST :EXTREMUM :HASH-TABLE-ALIST :HASH-TABLE-KEYS :HASH-TABLE-PLIST :HASH-TABLE-VALUES :IOTA :N-GRAMS :ONCE-ONLY :RANGE :RCURRY :READ-FILE-INTO-STRING :REQUIRED-ARGUMENT :RIFFLE :SUBDIVIDE :SYMB :TREE-COLLECT :WITH-GENSYMS) :ensure-package T :package "SAND.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :COPY-ARRAY :CURRY :DEFINE-CONSTANT :ENSURE-BOOLEAN :ENSURE-GETHASH :ENSURE-LIST :EXTREMUM :FLIP :HASH-TABLE-ALIST :HASH-TABLE-KEYS :HASH-TABLE-PLIST :HASH-TABLE-VALUES :IOTA :N-GRAMS :ONCE-ONLY :RANGE :RCURRY :READ-FILE-INTO-STRING :REQUIRED-ARGUMENT :RIFFLE :SEPARATED-STRING-APPEND :SUBDIVIDE :SYMB :TREE-COLLECT :WITH-GENSYMS) :ensure-package T :package "SAND.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "SAND.QUICKUTILS")
@@ -15,16 +15,17 @@
 (when (boundp '*utilities*)
   (setf *utilities* (union *utilities* '(:MAKE-GENSYM-LIST :ENSURE-FUNCTION
                                          :COMPOSE :COPY-ARRAY :CURRY
-                                         :DEFINE-CONSTANT :ENSURE-GETHASH
-                                         :ENSURE-LIST :EXTREMUM
-                                         :HASH-TABLE-ALIST :MAPHASH-KEYS
+                                         :DEFINE-CONSTANT :ENSURE-BOOLEAN
+                                         :ENSURE-GETHASH :ENSURE-LIST :EXTREMUM
+                                         :FLIP :HASH-TABLE-ALIST :MAPHASH-KEYS
                                          :HASH-TABLE-KEYS :HASH-TABLE-PLIST
                                          :MAPHASH-VALUES :HASH-TABLE-VALUES
                                          :IOTA :TAKE :N-GRAMS :ONCE-ONLY :RANGE
                                          :RCURRY :WITH-OPEN-FILE*
                                          :WITH-INPUT-FROM-FILE
                                          :READ-FILE-INTO-STRING
-                                         :REQUIRED-ARGUMENT :RIFFLE :SUBDIVIDE
+                                         :REQUIRED-ARGUMENT :RIFFLE
+                                         :SEPARATED-STRING-APPEND :SUBDIVIDE
                                          :MKSTR :SYMB :TREE-COLLECT
                                          :STRING-DESIGNATOR :WITH-GENSYMS))))
 (eval-when (:compile-toplevel :load-toplevel :execute)
@@ -155,6 +156,11 @@ equal under `test` to result of evaluating `initial-value`."
        ,@(when documentation `(,documentation))))
   
 
+  (defun ensure-boolean (x)
+    "Convert `x` into a Boolean value."
+    (and x t))
+  
+
   (defmacro ensure-gethash (key hash-table &optional default)
     "Like `gethash`, but if `key` is not found in the `hash-table` saves the `default`
 under key before returning it. Secondary return value is true if key was
@@ -214,6 +220,12 @@ If `sequence` is empty, `nil` is returned."
                     (length sequence)
                     :start start
                     :end end)))))
+  
+
+  (defun flip (f)
+    "Return a function whose argument order of a binary function `f` is reversed."
+    #'(lambda (y x)
+        (funcall f x y)))
   
 
   (defun hash-table-alist (table)
@@ -435,6 +447,34 @@ a default value for required keyword arguments."
             :collect obj))
   
 
+  (defun separated-string-append* (separator sequence-of-strings)
+    "Concatenate all of the strings in SEQUENCE-OF-STRINGS separated
+    by the string SEPARATOR."
+    (etypecase sequence-of-strings
+      (null "")
+      
+      (cons (with-output-to-string (*standard-output*)
+              (mapl #'(lambda (tail)
+                        (write-string (car tail))
+                        (unless (null (cdr tail))
+                          (write-string separator)))
+                    sequence-of-strings)))
+      
+      (sequence
+       (let ((length (length sequence-of-strings)))
+         (with-output-to-string (*standard-output*)
+           (map nil #'(lambda (string)
+                        (write-string string)
+                        (unless (zerop (decf length))
+                          (write-string separator)))
+                sequence-of-strings))))))
+  
+  (defun separated-string-append (separator &rest strings)
+    "Concatenate the strings STRINGS separated by the string
+SEPARATOR."
+    (separated-string-append* separator strings))
+  
+
   (defun subdivide (sequence chunk-size)
     "Split `sequence` into subsequences of size `chunk-size`."
     (check-type sequence sequence)
@@ -537,10 +577,11 @@ unique symbol the named variable will be bound to."
     `(with-gensyms ,names ,@forms))
   
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (export '(compose copy-array curry define-constant ensure-gethash ensure-list
-            extremum hash-table-alist hash-table-keys hash-table-plist
-            hash-table-values iota n-grams once-only range rcurry
-            read-file-into-string required-argument riffle subdivide symb
-            tree-collect with-gensyms with-unique-names)))
+  (export '(compose copy-array curry define-constant ensure-boolean
+            ensure-gethash ensure-list extremum flip hash-table-alist
+            hash-table-keys hash-table-plist hash-table-values iota n-grams
+            once-only range rcurry read-file-into-string required-argument
+            riffle separated-string-append separated-string-append* subdivide
+            symb tree-collect with-gensyms with-unique-names)))
 
 ;;;; END OF quickutils.lisp ;;;;

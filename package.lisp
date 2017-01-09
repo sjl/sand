@@ -1,6 +1,3 @@
-; (rename-package :charms :hunchentoot '(:ht))
-
-
 (defpackage :sand.utils
   (:use
     :cl
@@ -83,20 +80,6 @@
     :cl-arrows
     :sand.quickutils
     :sand.utils))
-
-(defpackage :sand.sketch
-  (:use
-    :cl
-    :losh
-    :sketch
-    :iterate
-    :sand.quickutils
-    :sand.utils)
-  (:shadowing-import-from :iterate
-    :in)
-  (:shadowing-import-from :sketch
-    :degrees
-    :radians))
 
 (defpackage :sand.markov
   (:use
@@ -240,6 +223,55 @@
   (:export
     ))
 
+(defpackage :sand.story
+  (:use
+    :cl
+    :cl-arrows
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils)
+  (:export
+    ))
+
+(defpackage :sand.number-letters
+  (:use
+    :cl
+    :cl-arrows
+    :losh
+    :iterate
+    :function-cache
+    :sand.quickutils
+    :sand.utils)
+  (:export
+    ))
+
+(defpackage :sand.urn
+  (:use
+    :cl
+    :cl-arrows
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils)
+  (:export
+    ))
+
+
+(defpackage :sand.sketch
+  (:use
+    :cl
+    :losh
+    :sketch
+    :iterate
+    :sand.quickutils
+    :sand.utils)
+  (:shadowing-import-from :iterate
+    :in)
+  (:shadowing-import-from :sketch
+    :degrees
+    :radians))
+
 (defpackage :sand.mandelbrot
   (:use
     :cl
@@ -268,30 +300,6 @@
     :start-profiling
     :stop-profiling
     :profile))
-
-
-(defpackage :sand.number-letters
-  (:use
-    :cl
-    :cl-arrows
-    :losh
-    :iterate
-    :function-cache
-    :sand.quickutils
-    :sand.utils)
-  (:export
-    ))
-
-(defpackage :sand.urn
-  (:use
-    :cl
-    :cl-arrows
-    :losh
-    :iterate
-    :sand.quickutils
-    :sand.utils)
-  (:export
-    ))
 
 
 (defpackage :sand.turing-omnibus.wallpaper

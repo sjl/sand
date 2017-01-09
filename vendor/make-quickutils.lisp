@@ -8,9 +8,11 @@
                :copy-array
                :curry
                :define-constant
+               :ensure-boolean
                :ensure-gethash
                :ensure-list
                :extremum
+               :flip
                :hash-table-alist
                :hash-table-keys
                :hash-table-plist
@@ -23,6 +25,7 @@
                :read-file-into-string
                :required-argument
                :riffle
+               :separated-string-append
                :subdivide
                :symb
                :tree-collect

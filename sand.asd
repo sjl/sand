@@ -15,6 +15,7 @@
                :cl-arrows
                :cl-charms
                :cl-fad
+               :cl-ppcre
                :clss
                :compiler-macro
                :drakma
@@ -72,6 +73,7 @@
                   :components ((:file "compiler")))
                  (:file "sketch")
                  (:file "mandelbrot")
+                 (:file "story")
                  (:module "turing-omnibus"
                   :serial t
                   :components ((:file "wallpaper")
