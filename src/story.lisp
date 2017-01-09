@@ -3,7 +3,7 @@
 ;;; Basically a Lispy version of Tracery https://github.com/galaxykate/tracery
 ;;; without the nutty string-parsing stuff.
 ;;;
-;;; (define-symbol name ...expressions...)
+;;; (define-rule name ...expressions...)
 ;;;
 ;;; strings evaluate to themselves: "foo bar" -> "foo bar"
 ;;;
@@ -97,7 +97,7 @@
     (evaluate-expression expression)))
 
 
-(defmacro define-symbol (name &rest expressions)
+(defmacro define-rule (name &rest expressions)
   `(defun ,name ()
      (evaluate-expression
        (random-elt ,(coerce expressions 'vector)))))
@@ -147,13 +147,13 @@
 
 
 ;;;; Example ------------------------------------------------------------------
-(define-symbol name
+(define-rule name
   "arjun"
   "yuuma"
   "jess"
   "bob smith")
 
-(define-symbol nature-noun
+(define-rule nature-noun
   "ocean"
   "mountain"
   "forest"
@@ -164,7 +164,7 @@
   "sea"
   "desert")
 
-(define-symbol animal
+(define-rule animal
   "unicorn"
   "raven"
   "turkey"
@@ -179,7 +179,7 @@
   "duck"
   "kitten")
 
-(define-symbol color
+(define-rule color
   "orange"
   "blue"
   "white"
@@ -189,13 +189,13 @@
   "indigo"
   "turquoise")
 
-(define-symbol activity
+(define-rule activity
   "running"
   "jumping"
   "flying"
   "carousing")
 
-(define-symbol sentence
+(define-rule sentence
   ("The" color animal "of the" nature-noun "is called" #(name cap-all q) :. ".")
   ("The" animal "was" activity "in the" #(nature-noun s) :. ".")
   (#(name cap-all pos) "favorite color is" color :. ".")
@@ -203,63 +203,63 @@
   ("The" #(animal s) "were" activity "in the" nature-noun :. "."))
 
 
-; (generate-string 'sentence)
+; (iterate (repeat 30) (pr (generate-string 'sentence)))
 
-(define-symbol monster
+(define-rule monster
   :bat
   :kobold
   :goblin)
 
-(define-symbol size
+(define-rule size
   5 6 7 8 9 10)
 
-(define-symbol money
+(define-rule money
   (#(100 random) :gold)
   (#(500 random) :silver))
 
-(define-symbol potion-type
+(define-rule potion-type
   "healing"
   "levitation"
   "detect magic"
   "confusion")
 
-(define-symbol potion-quality
+(define-rule potion-quality
   "strong"
   "weak"
   "small")
 
-(define-symbol potion
+(define-rule potion
   (potion-quality "potion of" potion-type)
   ("potion of" potion-type))
 
-(define-symbol enchant
+(define-rule enchant
   "+1"
   "+2"
   "+3")
 
-(define-symbol armor-piece
+(define-rule armor-piece
   "shield"
   "breastplate"
   "suit of chain mail"
   "belt"
   "helmet")
 
-(define-symbol armor
+(define-rule armor
   armor-piece
   (enchant armor-piece))
 
-(define-symbol item%
+(define-rule item%
   armor
   potion)
 
 (defun item ()
   (generate-string #(item% a)))
 
-(define-symbol loot
+(define-rule loot
   money
   item)
 
-(define-symbol room%
+(define-rule room%
   (:size size
    :loot loot
    :monster monster))
