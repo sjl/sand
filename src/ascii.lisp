@@ -59,10 +59,10 @@
      (unwind-protect (progn ,@body)
        (charms:destroy-window ,symbol))))
 
-; (defmacro with-panel ((symbol window) &body body)
-;   `(let ((,symbol (charms:make-panel ,window)))
-;      (unwind-protect (progn ,@body)
-;        (charms:destroy-panel ,symbol))))
+(defmacro with-panel ((symbol window) &body body)
+  `(let ((,symbol (charms:make-panel ,window)))
+     (unwind-protect (progn ,@body)
+       (charms:destroy-panel ,symbol))))
 
 (defmacro with-windows (bindings &body body)
   (if (null bindings)
@@ -71,12 +71,12 @@
        (with-windows ,(rest bindings)
          ,@body))))
 
-; (defmacro with-panels (bindings &body body)
-;   (if (null bindings)
-;     `(progn ,@body)
-;     `(with-panel ,(first bindings)
-;        (with-panels ,(rest bindings)
-;          ,@body))))
+(defmacro with-panels (bindings &body body)
+  (if (null bindings)
+    `(progn ,@body)
+    `(with-panel ,(first bindings)
+       (with-panels ,(rest bindings)
+         ,@body))))
 
 
 ; (defun run ()
