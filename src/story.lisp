@@ -44,6 +44,14 @@
 (defun vowelp (character)
   (ensure-boolean (member character '(#\a #\e #\i #\o #\u))))
 
+(defun mapcar% (function list)
+  (typecase list
+    (null nil)
+    (cons (cons (funcall function (car list))
+                (mapcar% function (cdr list))))
+    (t (funcall function list))))
+
+
 (defmacro assert-nonempty (place message)
   `(assert (not (emptyp ,place)) (,place) ,message))
 
@@ -62,45 +70,57 @@
   (apply #'cat contents))
 
 
-(defparameter *combination-pre* #'identity)
-(defparameter *combination-post* #'identity)
+(defparameter *rule-types* (make-hash-table))
 
 
-(defun evaluate-combination (list)
+(defun evaluate-combination (list environment)
   (-<> list
-    (funcall *combination-pre* <>)
-    (mapcar #'evaluate-expression <>)
-    (funcall *combination-post* <>)))
+    (funcall (getf environment :combination-pre) <>)
+    (mapcar% (rcurry #'evaluate-expression environment) <>)
+    (funcall (getf environment :combination-post) <>)))
 
-(defun evaluate-modifiers (vector)
+(defun evaluate-modifiers (vector environment)
   (reduce (flip #'funcall) vector
           :start 1
-          :initial-value (evaluate-expression (aref vector 0))))
+          :initial-value (evaluate-expression (aref vector 0) environment)))
 
-(defun evaluate-expression (expr)
+(defun evaluate-expression (expr environment)
   (typecase expr
     ((or string keyword null) expr)
     (symbol (funcall expr))
-    (vector (evaluate-modifiers expr))
+    (vector (evaluate-modifiers expr environment))
     (list (if (eq (first expr) 'quote)
             (second expr)
-            (evaluate-combination expr)))
+            (evaluate-combination expr environment)))
     (t expr)))
 
 
-(defun generate (expression)
-  (evaluate-expression expression))
+(defmacro define-rule (name-and-options &rest expressions)
+  (destructuring-bind (name &key type) name-and-options
+    `(defun ,name ()
+       (evaluate-expression
+         (random-elt ,(coerce expressions 'vector))
+         (gethash ,type *rule-types*)))))
 
-(defun generate-string (expression)
-  (let ((*combination-pre* #'string-pre)
-        (*combination-post* #'string-post))
-    (evaluate-expression expression)))
+(defun add-rule-type (type &key combination-pre combination-post)
+  (setf (gethash type *rule-types*)
+        `(:combination-pre ,combination-pre :combination-post ,combination-post))
+  (values))
 
 
-(defmacro define-rule (name &rest expressions)
-  `(defun ,name ()
-     (evaluate-expression
-       (random-elt ,(coerce expressions 'vector)))))
+(add-rule-type :string
+               :combination-pre #'string-pre
+               :combination-post #'string-post)
+
+(add-rule-type :data
+               :combination-pre #'identity
+               :combination-post #'identity)
+
+(defmacro define-string (name &rest body)
+  `(define-rule (,name :type :string) ,@body))
+
+(defmacro define-data (name &rest body)
+  `(define-rule (,name :type :data) ,@body))
 
 
 ;;;; Modifiers ----------------------------------------------------------------
@@ -147,13 +167,13 @@
 
 
 ;;;; Example ------------------------------------------------------------------
-(define-rule name
+(define-string name
   "arjun"
   "yuuma"
   "jess"
   "bob smith")
 
-(define-rule nature-noun
+(define-string nature-noun
   "ocean"
   "mountain"
   "forest"
@@ -164,7 +184,7 @@
   "sea"
   "desert")
 
-(define-rule animal
+(define-string animal
   "unicorn"
   "raven"
   "turkey"
@@ -179,7 +199,7 @@
   "duck"
   "kitten")
 
-(define-rule color
+(define-string color
   "orange"
   "blue"
   "white"
@@ -189,13 +209,13 @@
   "indigo"
   "turquoise")
 
-(define-rule activity
+(define-string activity
   "running"
   "jumping"
   "flying"
   "carousing")
 
-(define-rule sentence
+(define-string sentence
   ("The" color animal "of the" nature-noun "is called" #(name cap-all q) :. ".")
   ("The" animal "was" activity "in the" #(nature-noun s) :. ".")
   (#(name cap-all pos) "favorite color is" color :. ".")
@@ -203,66 +223,67 @@
   ("The" #(animal s) "were" activity "in the" nature-noun :. "."))
 
 
-; (iterate (repeat 30) (pr (generate-string 'sentence)))
+; (iterate (repeat 30) (pr (sentence)))
 
-(define-rule monster
-  :bat
-  :kobold
-  :goblin)
+(define-data monster-type
+  :bat :kobold :goblin)
 
-(define-rule size
+(define-data monster-health
+  #(50 random))
+
+(define-data monster
+  (monster-type :hp monster-health))
+
+(define-data amount
   5 6 7 8 9 10)
 
-(define-rule money
+(define-data money
   (#(100 random) :gold)
   (#(500 random) :silver))
 
-(define-rule potion-type
+(define-string potion-type
   "healing"
   "levitation"
   "detect magic"
   "confusion")
 
-(define-rule potion-quality
-  "strong"
-  "weak"
-  "small")
+(define-string potion-quality
+  "strong" "weak" "small")
 
-(define-rule potion
+(define-string potion
   (potion-quality "potion of" potion-type)
   ("potion of" potion-type))
 
-(define-rule enchant
-  "+1"
-  "+2"
-  "+3")
+(define-string enchant
+  "+1" "+2" "+3")
 
-(define-rule armor-piece
+(define-string armor-piece
   "shield"
   "breastplate"
   "suit of chain mail"
   "belt"
   "helmet")
 
-(define-rule armor
+(define-string armor
   armor-piece
   (enchant armor-piece))
 
-(define-rule item%
+(define-string item
   armor
   potion)
 
-(defun item ()
-  (generate-string #(item% a)))
-
-(define-rule loot
+(define-data single-loot
   money
   item)
 
-(define-rule room%
-  (:size size
-   :loot loot
-   :monster monster))
+(define-data loot
+  (single-loot)
+  (single-loot . loot))
+
+(define-data encounter
+  (:monster monster
+   :amount amount
+   :loot loot))
 
 
-; (iterate (repeat 30) (pr (funcall #'generate 'room%)))
+(iterate (repeat 30) (pr (encounter)))
