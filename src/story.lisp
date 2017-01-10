@@ -67,40 +67,77 @@
   (separate contents))
 
 (defun string-post (contents)
-  (apply #'cat contents))
+  (apply #'cat (mapcar #'aesthetic-string contents)))
 
 
 (defparameter *rule-types* (make-hash-table))
+(defparameter *bindings* nil)
+(defparameter *environment* nil)
 
 
-(defun evaluate-combination (list environment)
+(defun evaluate-combination (list)
   (-<> list
-    (funcall (getf environment :combination-pre) <>)
-    (mapcar% (rcurry #'evaluate-expression environment) <>)
-    (funcall (getf environment :combination-post) <>)))
+    (funcall (getf *environment* :combination-pre) <>)
+    (mapcar% #'evaluate-expression <>)
+    (funcall (getf *environment* :combination-post) <>)))
 
-(defun evaluate-modifiers (vector environment)
+(defun evaluate-modifiers (vector)
   (reduce (flip #'funcall) vector
           :start 1
-          :initial-value (evaluate-expression (aref vector 0) environment)))
+          :initial-value (evaluate-expression (aref vector 0))))
 
-(defun evaluate-expression (expr environment)
+(defun create-binding (binding)
+  (destructuring-bind (symbol expr) binding
+    (list symbol (evaluate-expression expr))))
+
+(defun evaluate-bind (bindings expr)
+  (let* ((new-bindings (mapcan (rcurry #'create-binding) bindings))
+         (*bindings* (cons new-bindings *bindings*)))
+    (evaluate-expression expr)))
+
+(defun evaluate-bind* (bindings expr)
+  (destructuring-bind (binding . remaining-bindings) bindings
+    (let ((*bindings* (cons (create-binding binding)
+                            *bindings*)))
+      (if remaining-bindings
+        (evaluate-bind* remaining-bindings expr)
+        (evaluate-expression expr)))))
+
+(defun lookup-binding (symbol)
+  (iterate (for frame :in *bindings*)
+           (for value = (getf frame symbol 'not-found))
+           (unless (eq value 'not-found)
+             (return (values value t)))
+           (finally (return (values nil nil)))))
+
+(defun evaluate-symbol (symbol)
+  (if-found value (lookup-binding symbol)
+    value
+    (funcall symbol)))
+
+(defun evaluate-lisp (expr)
+  (eval expr))
+
+(defun evaluate-expression (expr)
   (typecase expr
     ((or string keyword null) expr)
-    (symbol (funcall expr))
-    (vector (evaluate-modifiers expr environment))
-    (list (if (eq (first expr) 'quote)
-            (second expr)
-            (evaluate-combination expr environment)))
+    (symbol (evaluate-symbol expr))
+    (vector (evaluate-modifiers expr))
+    (cons (case (first expr)
+            (quote (second expr))
+            (bind (evaluate-bind (second expr) (cddr expr)))
+            (bind* (evaluate-bind* (second expr) (cddr expr)))
+            (lisp (evaluate-lisp (second expr)))
+            (t (evaluate-combination expr))))
     (t expr)))
 
 
 (defmacro define-rule (name-and-options &rest expressions)
   (destructuring-bind (name &key type) name-and-options
     `(defun ,name ()
-       (evaluate-expression
-         (random-elt ,(coerce expressions 'vector))
-         (gethash ,type *rule-types*)))))
+       (let ((*environment* (gethash ,type *rule-types*)))
+         (evaluate-expression
+           (random-elt ,(coerce expressions 'vector)))))))
 
 (defun add-rule-type (type &key combination-pre combination-post)
   (setf (gethash type *rule-types*)
@@ -223,6 +260,32 @@
   ("The" #(animal s) "were" activity "in the" nature-noun :. "."))
 
 
+(define-string pronoun
+  "he" "she")
+
+(define-string posessive-pronoun
+  "his" "her")
+
+(define-string omen
+  "good omen"
+  "bad omen")
+
+
+(define-string story%
+  ("There once was" #(color a) animal "named"  hero :. "."
+   cap-pro "journeyed to a distant" nature-noun "to find" #(animal a) :. "."
+   "On the way" pronoun "saw" (lisp (random-range 10 20)) #(animal s) activity :. "."
+   hero "considered this to be a" omen :. ".")
+  (bind ((victim animal))
+    (hero "came upon a sick" victim :. "."
+     cap-pro "touched the" victim "and" posessive-pronoun "wounds were healed.")))
+
+(define-string story
+  (bind* ((hero #(name cap-all))
+          (pronoun pronoun)
+          (cap-pro #(pronoun cap)))
+    (story%)))
+
 ; (iterate (repeat 30) (pr (sentence)))
 
 (define-data monster-type
@@ -286,4 +349,4 @@
    :loot loot))
 
 
-(iterate (repeat 30) (pr (encounter)))
+; (iterate (repeat 30) (pr (encounter)))

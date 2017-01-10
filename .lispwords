@@ -4,3 +4,4 @@
 (1 bdd-case)
 (1 sanity-check)
 (1 scancode-case)
+(1 bind bind*)
