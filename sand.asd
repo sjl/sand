@@ -24,6 +24,7 @@
                :html-entities
                :iterate
                :losh
+               :parse-float
                :parenscript
                :plump
                :rs-colors
@@ -74,6 +75,7 @@
                  (:file "sketch")
                  (:file "mandelbrot")
                  (:file "story")
+                 (:file "qud")
                  (:module "turing-omnibus"
                   :serial t
                   :components ((:file "wallpaper")

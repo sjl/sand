@@ -257,6 +257,17 @@
   (:export
     ))
 
+(defpackage :sand.qud
+  (:use
+    :cl
+    :cl-arrows
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils)
+  (:export
+    ))
+
 
 (defpackage :sand.sketch
   (:use

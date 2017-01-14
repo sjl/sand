@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :COPY-ARRAY :CURRY :DEFINE-CONSTANT :ENSURE-BOOLEAN :ENSURE-GETHASH :ENSURE-LIST :EXTREMUM :FLIP :HASH-TABLE-ALIST :HASH-TABLE-KEYS :HASH-TABLE-PLIST :HASH-TABLE-VALUES :IOTA :N-GRAMS :ONCE-ONLY :RANGE :RCURRY :READ-FILE-INTO-STRING :REQUIRED-ARGUMENT :RIFFLE :SEPARATED-STRING-APPEND :SUBDIVIDE :SYMB :TREE-COLLECT :WITH-GENSYMS) :ensure-package T :package "SAND.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :COPY-ARRAY :CURRY :DEFINE-CONSTANT :ENSURE-BOOLEAN :ENSURE-GETHASH :ENSURE-LIST :EXTREMUM :FLIP :HASH-TABLE-ALIST :HASH-TABLE-KEYS :HASH-TABLE-PLIST :HASH-TABLE-VALUES :WRITE-STRING-INTO-FILE :IOTA :N-GRAMS :ONCE-ONLY :RANGE :RCURRY :READ-FILE-INTO-STRING :REQUIRED-ARGUMENT :RIFFLE :SEPARATED-STRING-APPEND :SUBDIVIDE :SYMB :TREE-COLLECT :WITH-GENSYMS) :ensure-package T :package "SAND.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "SAND.QUICKUTILS")
@@ -20,8 +20,10 @@
                                          :FLIP :HASH-TABLE-ALIST :MAPHASH-KEYS
                                          :HASH-TABLE-KEYS :HASH-TABLE-PLIST
                                          :MAPHASH-VALUES :HASH-TABLE-VALUES
-                                         :IOTA :TAKE :N-GRAMS :ONCE-ONLY :RANGE
-                                         :RCURRY :WITH-OPEN-FILE*
+                                         :ONCE-ONLY :WITH-OPEN-FILE*
+                                         :WITH-OUTPUT-TO-FILE
+                                         :WRITE-STRING-INTO-FILE :IOTA :TAKE
+                                         :N-GRAMS :RANGE :RCURRY
                                          :WITH-INPUT-FROM-FILE
                                          :READ-FILE-INTO-STRING
                                          :REQUIRED-ARGUMENT :RIFFLE
@@ -284,45 +286,6 @@ If `sequence` is empty, `nil` is returned."
       values))
   
 
-  (declaim (inline iota))
-  (defun iota (n &key (start 0) (step 1))
-    "Return a list of `n` numbers, starting from `start` (with numeric contagion
-from `step` applied), each consequtive number being the sum of the previous one
-and `step`. `start` defaults to `0` and `step` to `1`.
-
-Examples:
-
-    (iota 4)                      => (0 1 2 3)
-    (iota 3 :start 1 :step 1.0)   => (1.0 2.0 3.0)
-    (iota 3 :start -1 :step -1/2) => (-1 -3/2 -2)"
-    (declare (type (integer 0) n) (number start step))
-    (loop repeat n
-          ;; KLUDGE: get numeric contagion right for the first element too
-          for i = (+ (- (+ start step) step)) then (+ i step)
-          collect i))
-  
-
-  (defun take (n sequence)
-    "Take the first `n` elements from `sequence`."
-    (subseq sequence 0 n))
-  
-
-  (defun n-grams (n sequence)
-    "Find all `n`-grams of the sequence `sequence`."
-    (assert (and (plusp n)
-                 (<= n (length sequence))))
-    
-    (etypecase sequence
-      ;; Lists
-      (list (loop :repeat (1+ (- (length sequence) n))
-                  :for seq :on sequence
-                  :collect (take n seq)))
-      
-      ;; General sequences
-      (sequence (loop :for i :to (- (length sequence) n)
-                      :collect (subseq sequence i (+ i n))))))
-  
-
   (defmacro once-only (specs &body forms)
     "Evaluates `forms` with symbols specified in `specs` rebound to temporary
 variables, ensuring that each initform is evaluated only once.
@@ -362,24 +325,6 @@ Example:
                ,@forms)))))
   
 
-  (defun range (start end &key (step 1) (key 'identity))
-    "Return the list of numbers `n` such that `start <= n < end` and
-`n = start + k*step` for suitable integers `k`. If a function `key` is
-provided, then apply it to each number."
-    (assert (<= start end))
-    (loop :for i :from start :below end :by step :collecting (funcall key i)))
-  
-
-  (defun rcurry (function &rest arguments)
-    "Returns a function that applies the arguments it is called
-with and `arguments` to `function`."
-    (declare (optimize (speed 3) (safety 1) (debug 1)))
-    (let ((fn (ensure-function function)))
-      (lambda (&rest more)
-        (declare (dynamic-extent more))
-        (multiple-value-call fn (values-list more) (values-list arguments)))))
-  
-
   (defmacro with-open-file* ((stream filespec &key direction element-type
                                                    if-exists if-does-not-exist external-format)
                              &body body)
@@ -400,6 +345,90 @@ the default value specified for `open`."
                             (when ,external-format
                               (list :external-format ,external-format)))))
          ,@body)))
+  
+
+  (defmacro with-output-to-file ((stream-name file-name &rest args
+                                                        &key (direction nil direction-p)
+                                                        &allow-other-keys)
+                                 &body body)
+    "Evaluate `body` with `stream-name` to an output stream on the file
+`file-name`. `args` is sent as is to the call to `open` except `external-format`,
+which is only sent to `with-open-file` when it's not `nil`."
+    (declare (ignore direction))
+    (when direction-p
+      (error "Can't specifiy :DIRECTION for WITH-OUTPUT-TO-FILE."))
+    `(with-open-file* (,stream-name ,file-name :direction :output ,@args)
+       ,@body))
+  
+
+  (defun write-string-into-file (string pathname &key (if-exists :error)
+                                                      if-does-not-exist
+                                                      external-format)
+    "Write `string` to `pathname`.
+
+The `external-format` parameter will be passed directly to `with-open-file`
+unless it's `nil`, which means the system default."
+    (with-output-to-file (file-stream pathname :if-exists if-exists
+                                               :if-does-not-exist if-does-not-exist
+                                               :external-format external-format)
+      (write-sequence string file-stream)))
+  
+
+  (declaim (inline iota))
+  (defun iota (n &key (start 0) (step 1))
+    "Return a list of `n` numbers, starting from `start` (with numeric contagion
+from `step` applied), each consequtive number being the sum of the previous one
+and `step`. `start` defaults to `0` and `step` to `1`.
+
+Examples:
+
+    (iota 4)                      => (0 1 2 3)
+    (iota 3 :start 1 :step 1.0)   => (1.0 2.0 3.0)
+    (iota 3 :start -1 :step -1/2) => (-1 -3/2 -2)"
+    (declare (type (integer 0) n) (number start step))
+    (loop repeat n
+          ;; KLUDGE: get numeric contagion right for the first element too
+          for i = (+ (- (+ start step) step)) then (+ i step)
+          collect i))
+  
+
+  (defun take (n sequence)
+    "Take the first `n` elements from `sequence`."
+    (subseq sequence 0 n))
+  
+
+  (defun n-grams (n sequence)
+    "Find all `n`-grams of the sequence `sequence`."
+    (assert (and (plusp n)
+                 (<= n (length sequence))))
+    
+    (etypecase sequence
+      ;; Lists
+      (list (loop :repeat (1+ (- (length sequence) n))
+                  :for seq :on sequence
+                  :collect (take n seq)))
+      
+      ;; General sequences
+      (sequence (loop :for i :to (- (length sequence) n)
+                      :collect (subseq sequence i (+ i n))))))
+  
+
+  (defun range (start end &key (step 1) (key 'identity))
+    "Return the list of numbers `n` such that `start <= n < end` and
+`n = start + k*step` for suitable integers `k`. If a function `key` is
+provided, then apply it to each number."
+    (assert (<= start end))
+    (loop :for i :from start :below end :by step :collecting (funcall key i)))
+  
+
+  (defun rcurry (function &rest arguments)
+    "Returns a function that applies the arguments it is called
+with and `arguments` to `function`."
+    (declare (optimize (speed 3) (safety 1) (debug 1)))
+    (let ((fn (ensure-function function)))
+      (lambda (&rest more)
+        (declare (dynamic-extent more))
+        (multiple-value-call fn (values-list more) (values-list arguments)))))
   
 
   (defmacro with-input-from-file ((stream-name file-name &rest args
@@ -579,9 +608,10 @@ unique symbol the named variable will be bound to."
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (export '(compose copy-array curry define-constant ensure-boolean
             ensure-gethash ensure-list extremum flip hash-table-alist
-            hash-table-keys hash-table-plist hash-table-values iota n-grams
-            once-only range rcurry read-file-into-string required-argument
-            riffle separated-string-append separated-string-append* subdivide
-            symb tree-collect with-gensyms with-unique-names)))
+            hash-table-keys hash-table-plist hash-table-values
+            write-string-into-file iota n-grams once-only range rcurry
+            read-file-into-string required-argument riffle
+            separated-string-append separated-string-append* subdivide symb
+            tree-collect with-gensyms with-unique-names)))
 
 ;;;; END OF quickutils.lisp ;;;;

@@ -17,6 +17,7 @@
                :hash-table-keys
                :hash-table-plist
                :hash-table-values
+               :write-string-into-file
                :iota
                :n-grams
                :once-only
