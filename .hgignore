@@ -3,3 +3,4 @@ scratch.lisp
 *.png
 *.dot
 sand.prof
+qud-items.txt
