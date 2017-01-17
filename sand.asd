@@ -56,7 +56,6 @@
                  (:file "ropes")
                  (:file "sorting")
                  (:file "ascii")
-                 (:file "markov")
                  (:file "dijkstra-maps")
                  #+sbcl (:file "ffi")
                  #+sbcl (:file "profiling")

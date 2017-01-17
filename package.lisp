@@ -81,16 +81,6 @@
     :sand.quickutils
     :sand.utils))
 
-(defpackage :sand.markov
-  (:use
-    :cl
-    :cl-arrows
-    :losh
-    :iterate
-    :split-sequence
-    :sand.quickutils
-    :sand.utils))
-
 (defpackage :sand.dijkstra-maps
   (:use
     :cl
