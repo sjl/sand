@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :COPY-ARRAY :CURRY :DEFINE-CONSTANT :ENSURE-BOOLEAN :ENSURE-GETHASH :ENSURE-LIST :EXTREMUM :FLIP :HASH-TABLE-ALIST :HASH-TABLE-KEYS :HASH-TABLE-PLIST :HASH-TABLE-VALUES :WRITE-STRING-INTO-FILE :IOTA :N-GRAMS :ONCE-ONLY :RANGE :RCURRY :READ-FILE-INTO-STRING :REQUIRED-ARGUMENT :RIFFLE :SEPARATED-STRING-APPEND :SUBDIVIDE :SYMB :TREE-COLLECT :WITH-GENSYMS) :ensure-package T :package "SAND.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :COPY-ARRAY :CURRY :DEFINE-CONSTANT :ENSURE-BOOLEAN :ENSURE-GETHASH :ENSURE-KEYWORD :ENSURE-LIST :EXTREMUM :FLIP :HASH-TABLE-ALIST :HASH-TABLE-KEYS :HASH-TABLE-PLIST :HASH-TABLE-VALUES :IOTA :N-GRAMS :ONCE-ONLY :RANGE :RCURRY :READ-FILE-INTO-STRING :REQUIRED-ARGUMENT :RIFFLE :SEPARATED-STRING-APPEND :SUBDIVIDE :SYMB :TREE-COLLECT :WITH-GENSYMS :WRITE-STRING-INTO-FILE) :ensure-package T :package "SAND.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "SAND.QUICKUTILS")
@@ -16,20 +16,21 @@
   (setf *utilities* (union *utilities* '(:MAKE-GENSYM-LIST :ENSURE-FUNCTION
                                          :COMPOSE :COPY-ARRAY :CURRY
                                          :DEFINE-CONSTANT :ENSURE-BOOLEAN
-                                         :ENSURE-GETHASH :ENSURE-LIST :EXTREMUM
-                                         :FLIP :HASH-TABLE-ALIST :MAPHASH-KEYS
+                                         :ENSURE-GETHASH :ENSURE-KEYWORD
+                                         :ENSURE-LIST :EXTREMUM :FLIP
+                                         :HASH-TABLE-ALIST :MAPHASH-KEYS
                                          :HASH-TABLE-KEYS :HASH-TABLE-PLIST
                                          :MAPHASH-VALUES :HASH-TABLE-VALUES
-                                         :ONCE-ONLY :WITH-OPEN-FILE*
-                                         :WITH-OUTPUT-TO-FILE
-                                         :WRITE-STRING-INTO-FILE :IOTA :TAKE
-                                         :N-GRAMS :RANGE :RCURRY
+                                         :IOTA :TAKE :N-GRAMS :ONCE-ONLY :RANGE
+                                         :RCURRY :WITH-OPEN-FILE*
                                          :WITH-INPUT-FROM-FILE
                                          :READ-FILE-INTO-STRING
                                          :REQUIRED-ARGUMENT :RIFFLE
                                          :SEPARATED-STRING-APPEND :SUBDIVIDE
                                          :MKSTR :SYMB :TREE-COLLECT
-                                         :STRING-DESIGNATOR :WITH-GENSYMS))))
+                                         :STRING-DESIGNATOR :WITH-GENSYMS
+                                         :WITH-OUTPUT-TO-FILE
+                                         :WRITE-STRING-INTO-FILE))))
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun make-gensym-list (length &optional (x "G"))
     "Returns a list of `length` gensyms, each generated as if with a call to `make-gensym`,
@@ -173,6 +174,11 @@ already in the table."
            (values (setf (gethash ,key ,hash-table) ,default) nil))))
   
 
+  (defun ensure-keyword (x)
+    "Ensure that a keyword is returned for the string designator `x`."
+    (values (intern (string x) :keyword)))
+  
+
   (defun ensure-list (list)
     "If `list` is a list, it is returned. Otherwise returns the list designated by `list`."
     (if (listp list)
@@ -286,94 +292,6 @@ If `sequence` is empty, `nil` is returned."
       values))
   
 
-  (defmacro once-only (specs &body forms)
-    "Evaluates `forms` with symbols specified in `specs` rebound to temporary
-variables, ensuring that each initform is evaluated only once.
-
-Each of `specs` must either be a symbol naming the variable to be rebound, or of
-the form:
-
-    (symbol initform)
-
-Bare symbols in `specs` are equivalent to
-
-    (symbol symbol)
-
-Example:
-
-    (defmacro cons1 (x) (once-only (x) `(cons ,x ,x)))
-      (let ((y 0)) (cons1 (incf y))) => (1 . 1)"
-    (let ((gensyms (make-gensym-list (length specs) "ONCE-ONLY"))
-          (names-and-forms (mapcar (lambda (spec)
-                                     (etypecase spec
-                                       (list
-                                        (destructuring-bind (name form) spec
-                                          (cons name form)))
-                                       (symbol
-                                        (cons spec spec))))
-                                   specs)))
-      ;; bind in user-macro
-      `(let ,(mapcar (lambda (g n) (list g `(gensym ,(string (car n)))))
-              gensyms names-and-forms)
-         ;; bind in final expansion
-         `(let (,,@(mapcar (lambda (g n)
-                             ``(,,g ,,(cdr n)))
-                           gensyms names-and-forms))
-            ;; bind in user-macro
-            ,(let ,(mapcar (lambda (n g) (list (car n) g))
-                    names-and-forms gensyms)
-               ,@forms)))))
-  
-
-  (defmacro with-open-file* ((stream filespec &key direction element-type
-                                                   if-exists if-does-not-exist external-format)
-                             &body body)
-    "Just like `with-open-file`, but `nil` values in the keyword arguments mean to use
-the default value specified for `open`."
-    (once-only (direction element-type if-exists if-does-not-exist external-format)
-      `(with-open-stream
-           (,stream (apply #'open ,filespec
-                           (append
-                            (when ,direction
-                              (list :direction ,direction))
-                            (when ,element-type
-                              (list :element-type ,element-type))
-                            (when ,if-exists
-                              (list :if-exists ,if-exists))
-                            (when ,if-does-not-exist
-                              (list :if-does-not-exist ,if-does-not-exist))
-                            (when ,external-format
-                              (list :external-format ,external-format)))))
-         ,@body)))
-  
-
-  (defmacro with-output-to-file ((stream-name file-name &rest args
-                                                        &key (direction nil direction-p)
-                                                        &allow-other-keys)
-                                 &body body)
-    "Evaluate `body` with `stream-name` to an output stream on the file
-`file-name`. `args` is sent as is to the call to `open` except `external-format`,
-which is only sent to `with-open-file` when it's not `nil`."
-    (declare (ignore direction))
-    (when direction-p
-      (error "Can't specifiy :DIRECTION for WITH-OUTPUT-TO-FILE."))
-    `(with-open-file* (,stream-name ,file-name :direction :output ,@args)
-       ,@body))
-  
-
-  (defun write-string-into-file (string pathname &key (if-exists :error)
-                                                      if-does-not-exist
-                                                      external-format)
-    "Write `string` to `pathname`.
-
-The `external-format` parameter will be passed directly to `with-open-file`
-unless it's `nil`, which means the system default."
-    (with-output-to-file (file-stream pathname :if-exists if-exists
-                                               :if-does-not-exist if-does-not-exist
-                                               :external-format external-format)
-      (write-sequence string file-stream)))
-  
-
   (declaim (inline iota))
   (defun iota (n &key (start 0) (step 1))
     "Return a list of `n` numbers, starting from `start` (with numeric contagion
@@ -413,6 +331,45 @@ Examples:
                       :collect (subseq sequence i (+ i n))))))
   
 
+  (defmacro once-only (specs &body forms)
+    "Evaluates `forms` with symbols specified in `specs` rebound to temporary
+variables, ensuring that each initform is evaluated only once.
+
+Each of `specs` must either be a symbol naming the variable to be rebound, or of
+the form:
+
+    (symbol initform)
+
+Bare symbols in `specs` are equivalent to
+
+    (symbol symbol)
+
+Example:
+
+    (defmacro cons1 (x) (once-only (x) `(cons ,x ,x)))
+      (let ((y 0)) (cons1 (incf y))) => (1 . 1)"
+    (let ((gensyms (make-gensym-list (length specs) "ONCE-ONLY"))
+          (names-and-forms (mapcar (lambda (spec)
+                                     (etypecase spec
+                                       (list
+                                        (destructuring-bind (name form) spec
+                                          (cons name form)))
+                                       (symbol
+                                        (cons spec spec))))
+                                   specs)))
+      ;; bind in user-macro
+      `(let ,(mapcar (lambda (g n) (list g `(gensym ,(string (car n)))))
+              gensyms names-and-forms)
+         ;; bind in final expansion
+         `(let (,,@(mapcar (lambda (g n)
+                             ``(,,g ,,(cdr n)))
+                           gensyms names-and-forms))
+            ;; bind in user-macro
+            ,(let ,(mapcar (lambda (n g) (list (car n) g))
+                    names-and-forms gensyms)
+               ,@forms)))))
+  
+
   (defun range (start end &key (step 1) (key 'identity))
     "Return the list of numbers `n` such that `start <= n < end` and
 `n = start + k*step` for suitable integers `k`. If a function `key` is
@@ -429,6 +386,28 @@ with and `arguments` to `function`."
       (lambda (&rest more)
         (declare (dynamic-extent more))
         (multiple-value-call fn (values-list more) (values-list arguments)))))
+  
+
+  (defmacro with-open-file* ((stream filespec &key direction element-type
+                                                   if-exists if-does-not-exist external-format)
+                             &body body)
+    "Just like `with-open-file`, but `nil` values in the keyword arguments mean to use
+the default value specified for `open`."
+    (once-only (direction element-type if-exists if-does-not-exist external-format)
+      `(with-open-stream
+           (,stream (apply #'open ,filespec
+                           (append
+                            (when ,direction
+                              (list :direction ,direction))
+                            (when ,element-type
+                              (list :element-type ,element-type))
+                            (when ,if-exists
+                              (list :if-exists ,if-exists))
+                            (when ,if-does-not-exist
+                              (list :if-does-not-exist ,if-does-not-exist))
+                            (when ,external-format
+                              (list :external-format ,external-format)))))
+         ,@body)))
   
 
   (defmacro with-input-from-file ((stream-name file-name &rest args
@@ -605,13 +584,40 @@ The string-designator is used as the argument to `gensym` when constructing the
 unique symbol the named variable will be bound to."
     `(with-gensyms ,names ,@forms))
   
+
+  (defmacro with-output-to-file ((stream-name file-name &rest args
+                                                        &key (direction nil direction-p)
+                                                        &allow-other-keys)
+                                 &body body)
+    "Evaluate `body` with `stream-name` to an output stream on the file
+`file-name`. `args` is sent as is to the call to `open` except `external-format`,
+which is only sent to `with-open-file` when it's not `nil`."
+    (declare (ignore direction))
+    (when direction-p
+      (error "Can't specifiy :DIRECTION for WITH-OUTPUT-TO-FILE."))
+    `(with-open-file* (,stream-name ,file-name :direction :output ,@args)
+       ,@body))
+  
+
+  (defun write-string-into-file (string pathname &key (if-exists :error)
+                                                      if-does-not-exist
+                                                      external-format)
+    "Write `string` to `pathname`.
+
+The `external-format` parameter will be passed directly to `with-open-file`
+unless it's `nil`, which means the system default."
+    (with-output-to-file (file-stream pathname :if-exists if-exists
+                                               :if-does-not-exist if-does-not-exist
+                                               :external-format external-format)
+      (write-sequence string file-stream)))
+  
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (export '(compose copy-array curry define-constant ensure-boolean
-            ensure-gethash ensure-list extremum flip hash-table-alist
-            hash-table-keys hash-table-plist hash-table-values
-            write-string-into-file iota n-grams once-only range rcurry
-            read-file-into-string required-argument riffle
-            separated-string-append separated-string-append* subdivide symb
-            tree-collect with-gensyms with-unique-names)))
+            ensure-gethash ensure-keyword ensure-list extremum flip
+            hash-table-alist hash-table-keys hash-table-plist hash-table-values
+            iota n-grams once-only range rcurry read-file-into-string
+            required-argument riffle separated-string-append
+            separated-string-append* subdivide symb tree-collect with-gensyms
+            with-unique-names write-string-into-file)))
 
 ;;;; END OF quickutils.lisp ;;;;

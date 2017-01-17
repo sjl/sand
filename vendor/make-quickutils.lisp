@@ -10,6 +10,7 @@
                :define-constant
                :ensure-boolean
                :ensure-gethash
+               :ensure-keyword
                :ensure-list
                :extremum
                :flip
@@ -17,7 +18,6 @@
                :hash-table-keys
                :hash-table-plist
                :hash-table-values
-               :write-string-into-file
                :iota
                :n-grams
                :once-only
@@ -31,6 +31,7 @@
                :symb
                :tree-collect
                :with-gensyms
+               :write-string-into-file
 
                )
   :package "SAND.QUICKUTILS")

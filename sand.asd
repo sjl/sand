@@ -75,6 +75,7 @@
                  (:file "mandelbrot")
                  (:file "story")
                  (:file "qud")
+                 (:file "istruct")
                  (:module "turing-omnibus"
                   :serial t
                   :components ((:file "wallpaper")
