@@ -3,7 +3,6 @@
     :cl
     :losh
     :iterate
-    :cl-arrows
     :sand.quickutils)
   (:export
     :average4))
@@ -11,7 +10,6 @@
 (defpackage :sand.primes
   (:use
     :cl
-    :cl-arrows
     :losh
     :iterate
     :sand.quickutils
@@ -24,7 +22,6 @@
     :cl
     :losh
     :iterate
-    :cl-arrows
     :sand.quickutils
     :sand.utils))
 
@@ -33,7 +30,6 @@
     :cl
     :losh
     :iterate
-    :cl-arrows
     :sandalphon.compiler-macro
     :sand.quickutils
     :sand.utils)
@@ -48,7 +44,6 @@
     :cl
     :losh
     :iterate
-    :cl-arrows
     :sand.quickutils
     :sand.utils))
 
@@ -57,7 +52,6 @@
     :cl
     :losh
     :sand.quickutils
-    :cl-arrows
     :cl-fad
     :parenscript) 
   (:shadowing-import-from :losh
@@ -68,7 +62,6 @@
     :cl
     :losh
     :iterate
-    :cl-arrows
     :sand.quickutils
     :sand.utils))
 
@@ -77,14 +70,12 @@
     :cl
     :losh
     :iterate
-    :cl-arrows
     :sand.quickutils
     :sand.utils))
 
 (defpackage :sand.dijkstra-maps
   (:use
     :cl
-    :cl-arrows
     :losh
     :iterate
     :sand.quickutils
@@ -99,7 +90,6 @@
 (defpackage :sand.graphs
   (:use
     :cl
-    :cl-arrows
     :losh
     :iterate
     :sand.quickutils
@@ -110,7 +100,6 @@
 (defpackage :sand.graphviz
   (:use
     :cl
-    :cl-arrows
     :losh
     :iterate
     :sand.quickutils
@@ -121,12 +110,13 @@
 (defpackage :sand.ropes
   (:use
     :cl
-    :cl-arrows
     :losh
     :iterate
     :trivia
     :sand.quickutils
     :sand.utils)
+  (:shadowing-import-from :losh
+    :<>)
   (:export
     ))
 
@@ -142,7 +132,6 @@
 (defpackage :sand.binary-decision-diagrams
   (:use
     :cl
-    :cl-arrows
     :losh
     :iterate
     :sand.graphviz
@@ -154,7 +143,6 @@
 (defpackage :sand.zero-suppressed-decision-diagrams
   (:use
     :cl
-    :cl-arrows
     :losh
     :iterate
     :sand.graphviz
@@ -167,7 +155,6 @@
 (defpackage :sand.huffman-trees
   (:use
     :cl
-    :cl-arrows
     :losh
     :iterate
     :sand.graphviz
@@ -179,7 +166,6 @@
 (defpackage :sand.streams
   (:use
     :cl
-    :cl-arrows
     :losh
     :iterate
     :sand.primes
@@ -192,7 +178,6 @@
 (defpackage :sand.ffi
   (:use
     :cl
-    :cl-arrows
     :losh
     :iterate
     :cffi
@@ -204,7 +189,6 @@
 (defpackage :sand.color-difference
   (:use
     :cl
-    :cl-arrows
     :losh
     :iterate
     :rs-colors
@@ -216,7 +200,6 @@
 (defpackage :sand.story
   (:use
     :cl
-    :cl-arrows
     :losh
     :iterate
     :sand.quickutils
@@ -227,7 +210,6 @@
 (defpackage :sand.number-letters
   (:use
     :cl
-    :cl-arrows
     :losh
     :iterate
     :function-cache
@@ -239,7 +221,6 @@
 (defpackage :sand.urn
   (:use
     :cl
-    :cl-arrows
     :losh
     :iterate
     :sand.quickutils
@@ -250,7 +231,6 @@
 (defpackage :sand.qud
   (:use
     :cl
-    :cl-arrows
     :losh
     :iterate
     :sand.quickutils
@@ -261,7 +241,6 @@
 (defpackage :sand.istruct
   (:use
     :cl
-    :cl-arrows
     :losh
     :iterate
     :sand.quickutils
@@ -303,7 +282,6 @@
 (defpackage :sand.profiling
   (:use
     :cl
-    :cl-arrows
     :losh
     :iterate
     :sand.quickutils
@@ -341,6 +319,5 @@
     :cl
     :losh
     :iterate
-    :cl-arrows
     :sand.quickutils
     :sand.utils))

@@ -50,46 +50,46 @@
 
 
 ;;;; Definition ---------------------------------------------------------------
-(defun required (name)
-  (error "Slot ~S is required" name))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun required (name)
+    (error "Slot ~S is required" name))
 
+  (defun build-slot (slot-spec)
+    (destructuring-bind (slot-name &key default type) slot-spec
+      `(,slot-name
+        ,(if default
+           default
+           `(required ',slot-name))
+        :read-only t
+        ,@(when type `(:type ,type)))))
 
-(defun build-slot (slot-spec)
-  (destructuring-bind (slot-name &key default type) slot-spec
-    `(,slot-name
-      ,(if default
-         default
-         `(required ',slot-name))
-      :read-only t
-      ,@(when type `(:type ,type)))))
+  (defun build-immutable-struct-form (name slots)
+    `(defstruct ,name
+       ,@(mapcar #'build-slot slots)))
 
-(defun build-immutable-struct-form (name slots)
-  `(defstruct ,name
-     ,@(mapcar #'build-slot slots)))
-
-(defun build-iset (name slots)
-  `(defmethod iset ((instance ,name) slot new-value)
-     (,(symb 'make- name)
-      ,@(iterate (for (slot . nil) :in slots)
-                 (collect (ensure-keyword slot))
-                 (collect `(if (eq slot ',slot)
-                             new-value
-                             (slot-value instance ',slot)))))))
-
-(defun build-equal? (name slots)
-  `(defmethod equal? ((a ,name) (b ,name))
-     (and ,@(iterate (for (slot . nil) :in slots)
-                     (collect `(equal?
-                                 (slot-value a ',slot)
-                                 (slot-value b ',slot)))))))
-
-(defun build-constructor (name slots)
-  (let ((slot-names (mapcar #'first slots)))
-    `(defun ,name ,slot-names
+  (defun build-iset (name slots)
+    `(defmethod iset ((instance ,name) slot new-value)
        (,(symb 'make- name)
-        ,@(iterate (for slot :in slot-names)
+        ,@(iterate (for (slot . nil) :in slots)
                    (collect (ensure-keyword slot))
-                   (collect slot))))))
+                   (collect `(if (eq slot ',slot)
+                               new-value
+                               (slot-value instance ',slot)))))))
+
+  (defun build-equal? (name slots)
+    `(defmethod equal? ((a ,name) (b ,name))
+       (and ,@(iterate (for (slot . nil) :in slots)
+                       (collect `(equal?
+                                   (slot-value a ',slot)
+                                   (slot-value b ',slot)))))))
+
+  (defun build-constructor (name slots)
+    (let ((slot-names (mapcar #'first slots)))
+      `(defun ,name ,slot-names
+         (,(symb 'make- name)
+          ,@(iterate (for slot :in slot-names)
+                     (collect (ensure-keyword slot))
+                     (collect slot)))))))
 
 
 (defmacro define-istruct (name-and-options &rest slots)

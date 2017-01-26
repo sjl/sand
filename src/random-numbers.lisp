@@ -31,23 +31,26 @@
            (type positive-fixnum modulus multiplier increment))
   (let ((val (mod (logxor seed multiplier)
                   modulus)))
-    (dlambda
-      (:next ()
-       (ldb (byte 32 16) ; java's j.u.Random only gives out 32 high-order bits
-            (setf val (mod (+ (* val multiplier) increment)
-                           modulus))))
-      (:modulus () modulus))))
+    (lambda (arg)
+      (case arg
+        (:next
+         (ldb (byte 32 16) ; java's j.u.Random only gives out 32 high-order bits
+              (setf val (mod (+ (* val multiplier) increment)
+                             modulus))))
+        (:modulus
+         modulus)))))
 
 (defun make-linear-congruential-rng (modulus multiplier increment seed)
   (declare (type nonnegative-fixnum seed)
            (type positive-fixnum modulus multiplier increment))
   (let ((val (mod (logxor seed multiplier)
                   modulus)))
-    (dlambda
-      (:next ()
-       (setf val (mod (+ (* val multiplier) increment)
-                      modulus)))
-      (:modulus () modulus))))
+    (lambda (arg)
+      (case arg
+        (:next
+         (setf val (mod (+ (* val multiplier) increment)
+                        modulus)))
+        (:modulus modulus)))))
 
 
 (declaim (inline rng-next rng-modulus))
