@@ -76,6 +76,7 @@
                  (:file "story")
                  (:file "qud")
                  (:file "istruct")
+                 (:file "names")
                  (:module "turing-omnibus"
                   :serial t
                   :components ((:file "wallpaper")

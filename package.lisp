@@ -248,6 +248,16 @@
   (:export
     ))
 
+(defpackage :sand.names
+  (:use
+    :cl
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils)
+  (:export
+    ))
+
 
 (defpackage :sand.sketch
   (:use
