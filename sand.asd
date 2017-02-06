@@ -19,13 +19,14 @@
                :clss
                :compiler-macro
                :drakma
+               :easing
                :flexi-streams
                :function-cache
                :html-entities
                :iterate
                :losh
-               :parse-float
                :parenscript
+               :parse-float
                :plump
                :rs-colors
                :sanitize
@@ -77,6 +78,7 @@
                  (:file "qud")
                  (:file "istruct")
                  (:file "names")
+                 (:file "easing")
                  (:module "turing-omnibus"
                   :serial t
                   :components ((:file "wallpaper")
