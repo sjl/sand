@@ -258,6 +258,16 @@
   (:export
     ))
 
+(defpackage :sand.pq
+  (:use
+    :cl
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils)
+  (:export
+    ))
+
 (defpackage :sand.easing
   (:use
     :cl

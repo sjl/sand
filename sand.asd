@@ -33,6 +33,7 @@
                :sketch
                :split-sequence
                :trivia
+               :trivial-main-thread
                :vex
                :yason
 
@@ -49,6 +50,7 @@
     :components ((:file "utils")
                  (:file "primes")
                  (:file "graphs")
+                 (:file "pq")
                  (:file "graphviz")
                  (:file "hanoi")
                  (:file "urn")
