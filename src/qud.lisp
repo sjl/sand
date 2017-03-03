@@ -74,6 +74,7 @@
     (sort prices #'> :key #'first)))
 
 (defun dump ()
+  (build-object-index *objects*)
   (write-string-into-file
     (with-output-to-string (*standard-output*)
       (print-table (cons '(price/weight item-key display-name price weight)
