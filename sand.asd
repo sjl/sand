@@ -12,7 +12,6 @@
                #+sbcl :sb-sprof
                :cffi
                :cl-algebraic-data-type
-               :cl-arrows
                :cl-charms
                :cl-fad
                :cl-ppcre
@@ -22,7 +21,6 @@
                :easing
                :flexi-streams
                :function-cache
-               :html-entities
                :iterate
                :losh
                :parenscript
@@ -50,7 +48,6 @@
     :components ((:file "utils")
                  (:file "primes")
                  (:file "graphs")
-                 (:file "pq")
                  (:file "graphviz")
                  (:file "hanoi")
                  (:file "urn")
@@ -81,6 +78,7 @@
                  (:file "istruct")
                  (:file "names")
                  (:file "easing")
+                 (:file "surreal-numbers")
                  (:module "turing-omnibus"
                   :serial t
                   :components ((:file "wallpaper")

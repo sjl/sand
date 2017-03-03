@@ -258,7 +258,7 @@
   (:export
     ))
 
-(defpackage :sand.pq
+(defpackage :sand.surreal-numbers
   (:use
     :cl
     :losh
