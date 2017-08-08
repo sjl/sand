@@ -17,6 +17,7 @@
                :cl-ppcre
                :clss
                :compiler-macro
+               :cl-conspack
                :drakma
                :easing
                :flexi-streams
@@ -30,6 +31,7 @@
                :sanitize
                :sketch
                :split-sequence
+               :storable-functions
                :trivia
                :trivial-main-thread
                :vex
@@ -51,6 +53,7 @@
                  (:file "graphviz")
                  (:file "hanoi")
                  (:file "urn")
+                 (:file "serializing-functions")
                  (:file "random-numbers")
                  (:file "generic-arithmetic")
                  (:file "ropes")
@@ -73,7 +76,6 @@
                   :components ((:file "compiler")))
                  (:file "sketch")
                  (:file "mandelbrot")
-                 (:file "story")
                  (:file "qud")
                  (:file "istruct")
                  (:file "names")

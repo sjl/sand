@@ -197,16 +197,6 @@
   (:export
     ))
 
-(defpackage :sand.story
-  (:use
-    :cl
-    :losh
-    :iterate
-    :sand.quickutils
-    :sand.utils)
-  (:export
-    ))
-
 (defpackage :sand.number-letters
   (:use
     :cl
@@ -269,6 +259,16 @@
     ))
 
 (defpackage :sand.easing
+  (:use
+    :cl
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils)
+  (:export
+    ))
+
+(defpackage :sand.serializing-functions
   (:use
     :cl
     :losh
