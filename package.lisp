@@ -119,29 +119,6 @@
   (:export
     ))
 
-(defpackage :sand.binary-decision-diagrams
-  (:use
-    :cl
-    :losh
-    :iterate
-    :sand.graphviz
-    :sand.quickutils
-    :sand.utils)
-  (:export
-    ))
-
-(defpackage :sand.zero-suppressed-decision-diagrams
-  (:use
-    :cl
-    :losh
-    :iterate
-    :sand.graphviz
-    :sand.quickutils
-    :sand.utils)
-  (:export
-    )
-  (:nicknames :sand.zdd))
-
 (defpackage :sand.huffman-trees
   (:use
     :cl

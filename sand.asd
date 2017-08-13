@@ -61,8 +61,6 @@
                  (:file "dijkstra-maps")
                  #+sbcl (:file "ffi")
                  #+sbcl (:file "profiling")
-                 (:file "binary-decision-diagrams")
-                 (:file "zero-suppressed-decision-diagrams")
                  (:file "huffman-trees")
                  (:file "streams")
                  (:file "color-difference")
