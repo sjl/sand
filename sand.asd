@@ -48,7 +48,6 @@
    (:module "src"
     :serial t
     :components ((:file "utils")
-                 (:file "primes")
                  (:file "graphs")
                  (:file "graphviz")
                  (:file "hanoi")

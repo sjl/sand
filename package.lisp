@@ -7,16 +7,6 @@
   (:export
     :average4))
 
-(defpackage :sand.primes
-  (:use
-    :cl
-    :losh
-    :iterate
-    :sand.quickutils
-    :sand.utils)
-  (:export
-    :primep))
-
 (defpackage :sand.random-numbers
   (:use
     :cl
@@ -168,7 +158,6 @@
     :cl
     :losh
     :iterate
-    :sand.primes
     :sand.quickutils
     :sand.utils)
   (:export
