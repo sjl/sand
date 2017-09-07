@@ -27,7 +27,11 @@
     (finally (return result))))
 
 
-(defgeneric iset (instance slot new-value))
+;; (defgeneric iset (instance slot new-value))
+(defun iset (instance slot new-value)
+  (let ((result (copy-structure instance)))
+    (setf (slot-value result slot) new-value)
+    result))
 
 (defun iset-in (instance slot-path new-value)
   (destructuring-bind (slot . remaining) slot-path
@@ -67,15 +71,6 @@
     `(defstruct ,name
        ,@(mapcar #'build-slot slots)))
 
-  (defun build-iset (name slots)
-    `(defmethod iset ((instance ,name) slot new-value)
-       (,(symb 'make- name)
-        ,@(iterate (for (slot . nil) :in slots)
-                   (collect (ensure-keyword slot))
-                   (collect `(if (eq slot ',slot)
-                               new-value
-                               (slot-value instance ',slot)))))))
-
   (defun build-equal? (name slots)
     `(defmethod equal? ((a ,name) (b ,name))
        (and ,@(iterate (for (slot . nil) :in slots)
@@ -98,7 +93,6 @@
     (let ((slots (mapcar #'ensure-list slots)))
       `(progn
          ,(build-immutable-struct-form name slots)
-         ,(build-iset name slots)
          ,(build-equal? name slots)
          ,(build-constructor name slots)
          ',name))))
