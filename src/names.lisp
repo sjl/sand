@@ -1,14 +1,25 @@
+(defpackage :sand.names
+  (:use
+    :cl
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils)
+  (:export))
+
 (in-package :sand.names)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun normalize-namespec (namespec)
-    (trivia:ematch namespec
-      ((list pre suf) (list (symbol-name pre)
-                            nil
-                            (symbol-name suf)))
-      ((list pre in suf) (list (symbol-name pre)
-                               (symbol-name in)
-                               (symbol-name suf)))))
+    (ecase (length namespec)
+      (2 (destructuring-bind (pre suf) namespec
+           (list (symbol-name pre)
+                 nil
+                 (symbol-name suf))))
+      (3 (destructuring-bind (pre in suf) namespec
+           (list (symbol-name pre)
+                 (symbol-name in)
+                 (symbol-name suf))))))
 
   (defun parse-namespecs (namespecs)
     (let ((namespecs (mapcar #'normalize-namespec namespecs)))

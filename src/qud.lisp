@@ -1,3 +1,15 @@
+(losh:eval-dammit
+  (ql:quickload '(:plump :clss :parse-float)))
+
+(defpackage :sand.qud
+  (:use
+    :cl
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils)
+  (:export))
+
 (in-package :sand.qud)
 
 (setf *print-length* 10)

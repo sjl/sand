@@ -1,3 +1,20 @@
+(losh:eval-dammit
+  (ql:quickload '(:compiler-macro)))
+
+(defpackage :sand.generic-arithmetic
+  (:use
+    :cl
+    :losh
+    :iterate
+    :sandalphon.compiler-macro
+    :sand.quickutils
+    :sand.utils)
+  (:shadow
+    :+
+    :-
+    :/
+    :*))
+
 (in-package :sand.generic-arithmetic)
 
 ;;;;     ________  __________ __    __________   _       _________  ____  ______

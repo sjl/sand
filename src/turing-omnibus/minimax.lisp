@@ -1,7 +1,15 @@
+(defpackage :sand.turing-omnibus.minimax
+  (:use
+    :cl
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils))
+
 (in-package :sand.turing-omnibus.minimax)
 
-(declaim (optimize (safety 1) (debug 3) (speed 3)))
-(declaim (optimize (safety 0) (debug 0) (speed 3)))
+;; (declaim (optimize (safety 1) (debug 3) (speed 3)))
+;; (declaim (optimize (safety 0) (debug 0) (speed 3)))
 
 
 ;;;; API ----------------------------------------------------------------------

@@ -1,3 +1,12 @@
+(defpackage :sand.istruct
+  (:use
+    :cl
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils)
+  (:export))
+
 (in-package :sand.istruct)
 
 ;;;; Equality -----------------------------------------------------------------

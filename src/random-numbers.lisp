@@ -1,3 +1,11 @@
+(defpackage :sand.random-numbers
+  (:use
+    :cl
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils))
+
 (in-package :sand.random-numbers)
 
 
@@ -115,7 +123,7 @@
 
 ;;;; Spectral Test
 (defun spectral ()
-  (spit "data"
+  #+no (spit "data"
     (iterate
       (repeat 1000)
       (for i = (rand))

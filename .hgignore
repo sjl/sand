@@ -4,3 +4,6 @@ scratch.lisp
 *.dot
 sand.prof
 qud-items.txt
+*.ppm
+*.pgm
+*.pbm

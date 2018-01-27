@@ -1,3 +1,11 @@
+(defpackage :sand.turing-omnibus.monto-carlo
+  (:use
+    :cl
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils))
+
 (in-package :sand.turing-omnibus.monto-carlo)
 
 ;;;; From The New Turing Omnibus, Chapter 4

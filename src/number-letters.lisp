@@ -1,3 +1,12 @@
+(defpackage :sand.number-letters
+  (:use
+    :cl
+    :losh
+    :iterate
+    :sand.quickutils
+    :sand.utils)
+  (:export))
+
 (in-package :sand.number-letters)
 
 ; https://www.youtube.com/watch?v=LYKn0yUTIU4
@@ -29,7 +38,7 @@
 (declaim (ftype (function ((integer 0)) fixnum)
                 fast-letter-count))
 (defun fast-letter-count (n)
-  (declare (optimize (debug 0) (safety 0) (speed 3)))
+  (declare (optimize speed))
   (if (zerop n)
     4
     (iterate
@@ -54,7 +63,7 @@
     (1+ (chain-length (fast-letter-count n)))))
 
 (defun print-chain (n)
-  (let ((lc (letter-count n)))
+  (let ((lc (fast-letter-count n)))
     (format t "~D - ~R -> ~D~%" n n lc)
     (when (not (= n 4))
       (print-chain lc))))
@@ -73,7 +82,7 @@
     (summing 1 :into result)
     (declare (type fixnum result))
     (when (< i *cache-size*)
-      (return (the fixnum (* result (aref *cache+ i)))))))
+      (return (the fixnum (* result (aref *cache* i)))))))
 
 
 (defun longest-chain (max)
@@ -83,5 +92,5 @@
 
 
 
-; (time
-;   (print-chain (longest-chain (expt 10 9))))
+;; (time
+;;   (print-chain (longest-chain (expt 10 8))))
