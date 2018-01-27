@@ -1,3 +1,15 @@
+(losh:eval-dammit
+  (ql:quickload '(:cl-conspack :storable-functions)))
+
+(defpackage :sand.serializing-functions
+  (:use
+    :cl
+    :losh
+    :iterate
+    :sand.quickutils))
+
+
+
 (in-package :sand.serializing-functions)
 
 (conspack:defencoding st-fun::function-referrer

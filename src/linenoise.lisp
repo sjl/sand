@@ -1,4 +1,15 @@
-(in-package :sand.ffi)
+(losh:eval-dammit
+  (ql:quickload '(:cffi)))
+
+(defpackage :sand.linenoise
+  (:use
+    :cl
+    :losh
+    :iterate
+    :cffi
+    :sand.quickutils))
+
+(in-package :sand.linenoise)
 
 
 ;;;; Library ------------------------------------------------------------------

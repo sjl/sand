@@ -1,3 +1,9 @@
+(defpackage :sand.hanoi
+  (:use
+    :cl
+    :losh
+    :sand.quickutils))
+
 (in-package :sand.hanoi)
 
 (defun move (disc from to)

@@ -1,3 +1,10 @@
+(defpackage :sand.terrain.diamond-square
+  (:use
+    :cl
+    :losh
+    :iterate
+    :sand.quickutils))
+
 (in-package :sand.terrain.diamond-square)
 
 
@@ -45,18 +52,20 @@
 
 (defun ds-square (heightmap x y radius spread)
   (setf (aref heightmap x y)
-        (random-around (average4 (hm-ref heightmap (- x radius) (- y radius))
-                                 (hm-ref heightmap (- x radius) (+ y radius))
-                                 (hm-ref heightmap (+ x radius) (- y radius))
-                                 (hm-ref heightmap (+ x radius) (+ y radius)))
+        (random-around (/ (+ (hm-ref heightmap (- x radius) (- y radius))
+                             (hm-ref heightmap (- x radius) (+ y radius))
+                             (hm-ref heightmap (+ x radius) (- y radius))
+                             (hm-ref heightmap (+ x radius) (+ y radius)))
+                          4)
                        spread)))
 
 (defun ds-diamond (heightmap x y radius spread)
   (setf (aref heightmap x y)
-        (random-around (average4 (hm-ref heightmap (- x radius) y)
-                                 (hm-ref heightmap (+ x radius) y)
-                                 (hm-ref heightmap x (- y radius))
-                                 (hm-ref heightmap x (+ y radius)))
+        (random-around (/ (+ (hm-ref heightmap (- x radius) y)
+                             (hm-ref heightmap (+ x radius) y)
+                             (hm-ref heightmap x (- y radius))
+                             (hm-ref heightmap x (+ y radius)))
+                          4)
                        spread)))
 
 

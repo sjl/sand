@@ -1,3 +1,10 @@
+(defpackage :sand.surreal-numbers
+  (:use
+    :cl
+    :losh
+    :iterate
+    :sand.quickutils))
+
 (in-package :sand.surreal-numbers)
 
 

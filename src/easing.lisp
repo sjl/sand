@@ -1,3 +1,13 @@
+(losh:eval-dammit
+  (ql:quickload '(:easing)))
+
+(defpackage :sand.easing
+  (:use
+    :cl
+    :losh
+    :iterate
+    :sand.quickutils))
+
 (in-package :sand.easing)
 
 

@@ -1,3 +1,16 @@
+(defpackage :sand.dijkstra-maps
+  (:use
+    :cl
+    :losh
+    :iterate
+    :sand.quickutils)
+  (:export
+    :dijkstra-map
+    :make-dijkstra-map
+    :dm-maximum-value
+    :dm-map
+    :dm-ref))
+
 (in-package :sand.dijkstra-maps)
 
 

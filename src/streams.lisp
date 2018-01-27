@@ -1,3 +1,10 @@
+(defpackage :sand.streams
+  (:use
+    :cl
+    :losh
+    :iterate
+    :sand.quickutils))
+
 (in-package :sand.streams)
 
 
@@ -40,7 +47,7 @@
 (defmacro str* (&rest args)
   (if (null (cdr args))
     (car args)
-    `(scons ,(car args) (stream* ,@(cdr args)))))
+    `(scons ,(car args) (str* ,@(cdr args)))))
 
 (defun str (&rest args)
   (if (null args)

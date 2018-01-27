@@ -1,3 +1,11 @@
+(defpackage :sand.huffman-trees
+  (:use
+    :cl
+    :losh
+    :iterate
+    :sand.quickutils)
+  (:export))
+
 (in-package :sand.huffman-trees)
 
 ;;;; Data ---------------------------------------------------------------------
