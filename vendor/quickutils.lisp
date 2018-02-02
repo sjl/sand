@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :COPY-ARRAY :CURRY :DEFINE-CONSTANT :ENSURE-BOOLEAN :ENSURE-GETHASH :ENSURE-KEYWORD :ENSURE-LIST :EXTREMUM :FLIP :HASH-TABLE-ALIST :HASH-TABLE-KEYS :HASH-TABLE-PLIST :HASH-TABLE-VALUES :IOTA :N-GRAMS :ONCE-ONLY :RANGE :RCURRY :READ-FILE-INTO-STRING :REQUIRED-ARGUMENT :RIFFLE :SEPARATED-STRING-APPEND :SUBDIVIDE :SYMB :TREE-COLLECT :WITH-GENSYMS :WRITE-STRING-INTO-FILE) :ensure-package T :package "SAND.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :COPY-ARRAY :CURRY :DEFINE-CONSTANT :ENSURE-BOOLEAN :ENSURE-GETHASH :ENSURE-KEYWORD :ENSURE-LIST :EXTREMUM :FLIP :HASH-TABLE-ALIST :HASH-TABLE-KEYS :HASH-TABLE-PLIST :HASH-TABLE-VALUES :IOTA :MAPPEND :N-GRAMS :ONCE-ONLY :RANGE :RCURRY :READ-FILE-INTO-STRING :REQUIRED-ARGUMENT :RIFFLE :SEPARATED-STRING-APPEND :SUBDIVIDE :SYMB :TREE-COLLECT :WITH-GENSYMS :WRITE-STRING-INTO-FILE) :ensure-package T :package "SAND.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "SAND.QUICKUTILS")
@@ -21,9 +21,9 @@
                                          :HASH-TABLE-ALIST :MAPHASH-KEYS
                                          :HASH-TABLE-KEYS :HASH-TABLE-PLIST
                                          :MAPHASH-VALUES :HASH-TABLE-VALUES
-                                         :IOTA :TAKE :N-GRAMS :ONCE-ONLY :RANGE
-                                         :RCURRY :WITH-OPEN-FILE*
-                                         :WITH-INPUT-FROM-FILE
+                                         :IOTA :MAPPEND :TAKE :N-GRAMS
+                                         :ONCE-ONLY :RANGE :RCURRY
+                                         :WITH-OPEN-FILE* :WITH-INPUT-FROM-FILE
                                          :READ-FILE-INTO-STRING
                                          :REQUIRED-ARGUMENT :RIFFLE
                                          :SEPARATED-STRING-APPEND :SUBDIVIDE
@@ -308,6 +308,13 @@ Examples:
           ;; KLUDGE: get numeric contagion right for the first element too
           for i = (+ (- (+ start step) step)) then (+ i step)
           collect i))
+  
+
+  (defun mappend (function &rest lists)
+    "Applies `function` to respective element(s) of each `list`, appending all the
+all the result list to a single list. `function` must return a list."
+    (loop for results in (apply #'mapcar function lists)
+          append results))
   
 
   (defun take (n sequence)
@@ -615,7 +622,7 @@ unless it's `nil`, which means the system default."
   (export '(compose copy-array curry define-constant ensure-boolean
             ensure-gethash ensure-keyword ensure-list extremum flip
             hash-table-alist hash-table-keys hash-table-plist hash-table-values
-            iota n-grams once-only range rcurry read-file-into-string
+            iota mappend n-grams once-only range rcurry read-file-into-string
             required-argument riffle separated-string-append
             separated-string-append* subdivide symb tree-collect with-gensyms
             with-unique-names write-string-into-file)))

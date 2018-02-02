@@ -1,6 +1,7 @@
 .PHONY: vendor
 
-vendor: vendor/quickutils.lisp
-
+# Vendor ----------------------------------------------------------------------
 vendor/quickutils.lisp: vendor/make-quickutils.lisp
-	cd vendor && ros run -L sbcl --load make-quickutils.lisp  --eval '(quit)'
+	cd vendor && sbcl --noinform --load make-quickutils.lisp  --eval '(quit)'
+
+vendor: vendor/quickutils.lisp

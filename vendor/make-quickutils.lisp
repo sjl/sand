@@ -19,6 +19,7 @@
                :hash-table-plist
                :hash-table-values
                :iota
+               :mappend
                :n-grams
                :once-only
                :range
