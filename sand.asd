@@ -44,4 +44,4 @@
   ((:module "vendor"
     :serial t
     :components ((:file "quickutils")))
-   (:file "package")))
+   ))

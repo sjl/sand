@@ -3,7 +3,7 @@ scratch.lisp
 *.png
 *.dot
 sand.prof
-qud-items.txt
+qud-*.txt
 *.ppm
 *.pgm
 *.pbm
